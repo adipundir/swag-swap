@@ -3,12 +3,11 @@
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useState } from "react";
 import { FileUpload } from "./FileUpload";
-import { Tag, Type, AlignLeft, DollarSign, Upload, CheckCircle2, AlertCircle, Loader2, Key, Copy } from "lucide-react";
+import { Tag, Type, AlignLeft, Upload, CheckCircle2, AlertCircle, Loader2, Key, Copy } from "lucide-react";
 
 interface ListingFormData {
   title: string;
   description: string;
-  price: string;
   imageUrl: string;
   category: string;
 }
@@ -20,7 +19,6 @@ export function CreateListing() {
   const [formData, setFormData] = useState<ListingFormData>({
     title: "",
     description: "",
-    price: "",
     imageUrl: "",
     category: "clothing",
   });
@@ -52,7 +50,6 @@ export function CreateListing() {
         },
         body: JSON.stringify({
           ...formData,
-          price: `${formData.price} ETH`,
           seller: wallets[0].address,
         }),
       });
@@ -72,7 +69,6 @@ export function CreateListing() {
       setFormData({
         title: "",
         description: "",
-        price: "",
         imageUrl: "",
         category: "clothing",
       });
@@ -113,18 +109,18 @@ export function CreateListing() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto px-4">
       <div className="bg-card border border-border/60 rounded-xl shadow-sm">
-        <div className="p-6 sm:p-8 border-b border-border/60">
-          <h2 className="text-2xl font-bold text-foreground tracking-tight mb-1">
+        <div className="p-4 sm:p-6 lg:p-8 border-b border-border/60">
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight mb-1">
             List Your Hackathon Swag
           </h2>
-          <p className="text-muted-foreground text-sm">
-            Create a listing to sell your exclusive merchandise on the decentralized marketplace.
+          <p className="text-muted-foreground text-xs sm:text-sm">
+            Create a listing to swap your exclusive merchandise on the decentralized marketplace.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
           {/* Title */}
           <div className="space-y-2">
             <label
@@ -146,64 +142,34 @@ export function CreateListing() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
-            {/* Category */}
-            <div className="space-y-2">
-              <label
-                htmlFor="category"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2"
+          {/* Category */}
+          <div className="space-y-2">
+            <label
+              htmlFor="category"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2"
+            >
+              <Tag className="w-3.5 h-3.5" />
+              Category <span className="text-destructive">*</span>
+            </label>
+            <div className="relative">
+              <select
+                id="category"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                required
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
               >
-                <Tag className="w-3.5 h-3.5" />
-                Category <span className="text-destructive">*</span>
-              </label>
-              <div className="relative">
-                <select
-                  id="category"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  required
-                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
-                >
-                  <option value="clothing">Clothing</option>
-                  <option value="accessories">Accessories</option>
-                  <option value="stickers">Stickers</option>
-                  <option value="collectibles">Collectibles</option>
-                  <option value="other">Other</option>
-                </select>
-                <div className="absolute right-3 top-3 pointer-events-none text-muted-foreground">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Price */}
-            <div className="space-y-2">
-              <label
-                htmlFor="price"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2"
-              >
-                <DollarSign className="w-3.5 h-3.5" />
-                Price <span className="text-destructive">*</span>
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  id="price"
-                  name="price"
-                  value={formData.price}
-                  onChange={handleChange}
-                  required
-                  min="0"
-                  step="0.01"
-                  placeholder="0.00"
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-12"
-                />
-                <span className="absolute right-3 top-2.5 text-xs font-medium text-muted-foreground">
-                  ETH
-                </span>
+                <option value="clothing">Clothing</option>
+                <option value="accessories">Accessories</option>
+                <option value="stickers">Stickers</option>
+                <option value="collectibles">Collectibles</option>
+                <option value="other">Other</option>
+              </select>
+              <div className="absolute right-3 top-3 pointer-events-none text-muted-foreground">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
               </div>
             </div>
           </div>
@@ -297,8 +263,8 @@ export function CreateListing() {
                     </button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    <strong className="font-medium text-foreground">Important:</strong> Share this code with buyers. 
-                    They will need it to complete the purchase. Save it securely!
+                    <strong className="font-medium text-foreground">Important:</strong> Share this code with swappers. 
+                    They will need it to complete the swap. Save it securely!
                   </p>
                 </div>
               )}
@@ -322,10 +288,10 @@ export function CreateListing() {
           </button>
         </form>
 
-        <div className="px-6 py-4 bg-muted/30 border-t border-border/60 rounded-b-xl">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 bg-muted/30 border-t border-border/60 rounded-b-xl">
           <p className="text-xs text-muted-foreground text-center">
             <strong className="font-medium text-foreground">Note:</strong> Your wallet address will be publicly visible
-            as the seller. Images are stored in the database.
+            as the swapper. Images are stored in the database.
           </p>
         </div>
       </div>

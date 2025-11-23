@@ -3,14 +3,13 @@
 // PRIVY with x402 support
 import { usePrivy, useWallets, useX402Fetch } from "@privy-io/react-auth";
 import { useState, useEffect } from "react";
-import { Search, DollarSign, AlertCircle, Loader2, ShoppingBag, ArrowRight, RefreshCw } from "lucide-react";
+import { Search, AlertCircle, Loader2, ShoppingBag, ArrowRight, RefreshCw } from "lucide-react";
 import { ListingDetailModal } from "./ListingDetailModal";
 
 export interface Listing {
   id: string;
   title: string;
   description: string;
-  price: string;
   imageUrl?: string;
   seller: string;
   createdAt: string;
@@ -166,14 +165,14 @@ export function Listings() {
   };
 
   const handlePurchase = async (listingId: string) => {
-    // Simulate purchase process - in a real app, this would interact with a smart contract or API
+    // Simulate swap process - in a real app, this would interact with a smart contract or API
     return new Promise<void>((resolve, reject) => {
       setTimeout(() => {
         // Simulate success/failure (90% success rate for demo)
         if (Math.random() > 0.1) {
           resolve();
         } else {
-          reject(new Error("Purchase failed. Please try again."));
+          reject(new Error("Swap failed. Please try again."));
         }
       }, 1500);
     });
@@ -197,7 +196,7 @@ export function Listings() {
         </div>
         <h3 className="text-lg font-medium mb-2">Login Required</h3>
         <p className="text-muted-foreground max-w-sm">
-          Please login to view and purchase exclusive listings with x402 payments.
+          Please login to view and swap exclusive listings with x402 payments.
         </p>
       </div>
     );
@@ -206,27 +205,29 @@ export function Listings() {
   return (
     <div className="space-y-8">
       {/* Fetch Control Panel */}
-      <div className="bg-card border border-border/60 rounded-xl p-6 shadow-sm">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-primary/10 rounded-lg text-primary">
-            <Search className="w-5 h-5" />
+      <div className="bg-card border border-border/60 rounded-xl p-4 sm:p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="p-2 bg-primary/10 rounded-lg text-primary shrink-0">
+              <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base sm:text-lg font-semibold tracking-tight">
+                Fetch Listings
+              </h2>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Access listings via x402 micro-payments
+              </p>
+            </div>
           </div>
-          <div className="flex-1">
-            <h2 className="text-lg font-semibold tracking-tight">
-              Fetch Listings
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Access listings via x402 micro-payments
-            </p>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <div className="px-3 py-1.5 bg-primary/10 text-primary rounded-md text-xs font-medium">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            <div className="px-3 py-1.5 bg-primary/10 text-primary rounded-md text-xs font-medium text-center sm:text-left">
               Base Sepolia Required
             </div>
             <button
               onClick={handleSwitchToBaseSepolia}
               disabled={switchingNetwork || !authenticated}
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {switchingNetwork ? (
                 <>
@@ -243,7 +244,7 @@ export function Listings() {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[2fr_1fr_auto] gap-4 items-end">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_auto] gap-4 items-end">
           <div className="space-y-2">
             <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               API URL
@@ -278,7 +279,7 @@ export function Listings() {
           <button
             onClick={handleFetchListings}
             disabled={loading || !apiUrl}
-            className="sm:col-span-2 md:col-span-1 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6"
+            className="sm:col-span-2 lg:col-span-1 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 sm:px-6"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -296,7 +297,7 @@ export function Listings() {
         </div>
 
         {error && (
-          <div className="mt-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
             <div className="flex items-start gap-3 text-sm">
               <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
               <div className="flex-1">
@@ -345,11 +346,11 @@ export function Listings() {
       {/* Results Grid */}
       {listings.length > 0 && (
         <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold tracking-tight">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <h3 className="text-lg sm:text-xl font-semibold tracking-tight">
               Available Listings
             </h3>
-            <span className="text-sm text-muted-foreground bg-secondary px-2.5 py-0.5 rounded-full">
+            <span className="text-xs sm:text-sm text-muted-foreground bg-secondary px-2.5 py-0.5 rounded-full">
               {listings.length} items
             </span>
           </div>
@@ -382,8 +383,8 @@ export function Listings() {
           <div className="bg-background p-4 rounded-full shadow-sm mb-4">
             <ShoppingBag className="w-8 h-8 text-muted-foreground/50" />
           </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">No listings yet</h3>
-          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+          <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2">No listings yet</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-md mx-auto px-4">
             Enter an API URL above and authorize the payment to reveal exclusive hackathon merchandise.
           </p>
         </div>
@@ -407,29 +408,24 @@ function ListingCard({ listing, onClick }: { listing: Listing; onClick: () => vo
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-secondary/50">
-            <ShoppingBag className="w-10 h-10 text-muted-foreground/20" />
+            <ShoppingBag className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground/20" />
           </div>
         )}
-        <div className="absolute top-2 right-2">
-           <span className="inline-flex items-center rounded-md bg-background/90 backdrop-blur px-2 py-1 text-xs font-medium ring-1 ring-inset ring-gray-500/10 shadow-sm">
-             {listing.price}
-           </span>
-        </div>
       </div>
       
-      <div className="p-5 space-y-3">
+      <div className="p-4 sm:p-5 space-y-2 sm:space-y-3">
         <div>
-          <h4 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+          <h4 className="text-sm sm:text-base font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
             {listing.title}
           </h4>
-          <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mt-1">
             {listing.description}
           </p>
         </div>
         
-        <div className="pt-3 border-t border-border/50 flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Seller</span>
-          <span className="font-mono bg-secondary px-1.5 py-0.5 rounded text-secondary-foreground">
+        <div className="pt-2 sm:pt-3 border-t border-border/50 flex items-center justify-between text-xs">
+          <span className="text-muted-foreground">Swapper</span>
+          <span className="font-mono bg-secondary px-1.5 py-0.5 rounded text-secondary-foreground text-[10px] sm:text-xs">
             {listing.seller.slice(0, 6)}...{listing.seller.slice(-4)}
           </span>
         </div>

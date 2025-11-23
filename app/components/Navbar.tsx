@@ -112,24 +112,25 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4 mx-auto">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
+      <div className="container flex h-14 sm:h-16 max-w-screen-2xl items-center justify-between px-3 sm:px-4 mx-auto">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+          <div className="h-7 w-7 sm:h-8 sm:w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold shrink-0">
             S
           </div>
-          <span className="font-bold text-xl tracking-tight">SwagSwap</span>
+          <span className="font-bold text-base sm:text-xl tracking-tight truncate">SwagSwap</span>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4 flex-shrink-0">
           {!ready ? (
             <button
               disabled
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground h-9 px-4 py-2"
+              className="inline-flex items-center justify-center rounded-md text-xs sm:text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground h-8 sm:h-9 px-2 sm:px-4 py-1.5 sm:py-2"
             >
-              Loading...
+              <span className="hidden sm:inline">Loading...</span>
+              <span className="sm:hidden">...</span>
             </button>
           ) : authenticated ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
               {/* World ID Verification Button */}
               {checkingStatus ? null : !isVerified ? (
                 process.env.NEXT_PUBLIC_WORLD_APP_ID ? (
@@ -144,18 +145,20 @@ export function Navbar() {
                       <button
                         onClick={open}
                         disabled={isVerifying}
-                        className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2"
+                        className="inline-flex items-center justify-center rounded-md text-xs sm:text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 sm:h-9 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2"
                         title="Verify you're human with World ID"
                       >
                         {isVerifying ? (
                           <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Verifying...
+                            <Loader2 className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
+                            <span className="hidden sm:inline">Verifying...</span>
+                            <span className="sm:hidden">...</span>
                           </>
                         ) : (
                           <>
-                            <ShieldCheck className="mr-2 h-4 w-4" />
-                            Verify Human
+                            <ShieldCheck className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                            <span className="hidden md:inline">Verify Human</span>
+                            <span className="md:hidden">Verify</span>
                           </>
                         )}
                       </button>
@@ -163,10 +166,13 @@ export function Navbar() {
                   </IDKitWidget>
                 ) : null
               ) : (
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-md">
-                  <ShieldCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-green-500/10 border border-green-500/20 rounded-md">
+                  <ShieldCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-600 dark:text-green-400 shrink-0" />
+                  <span className="text-xs sm:text-sm font-medium text-green-600 dark:text-green-400 hidden sm:inline">
                     Verified Human
+                  </span>
+                  <span className="text-xs sm:text-sm font-medium text-green-600 dark:text-green-400 sm:hidden">
+                    Verified
                   </span>
                 </div>
               )}
@@ -175,26 +181,28 @@ export function Navbar() {
                 onClick={() => {
                   navigator.clipboard.writeText(walletAddress);
                 }}
-                className="group flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors bg-secondary/50 hover:bg-secondary px-3 py-1.5 rounded-md border border-transparent hover:border-border"
+                className="group flex items-center gap-1 sm:gap-2 text-xs sm:text-sm font-medium text-muted-foreground hover:text-foreground transition-colors bg-secondary/50 hover:bg-secondary px-2 sm:px-3 py-1 sm:py-1.5 rounded-md border border-transparent hover:border-border"
                 title="Copy address"
               >
-                <Wallet className="h-4 w-4" />
-                <span className="font-mono">{truncatedAddress}</span>
-                <Copy className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <Wallet className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                <span className="font-mono hidden sm:inline">{truncatedAddress}</span>
+                <span className="font-mono sm:hidden text-[10px]">{walletAddress.slice(0, 4)}...{walletAddress.slice(-3)}</span>
+                <Copy className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 hidden sm:block" />
               </button>
               
               <button
                 onClick={logout}
-                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+                className="inline-flex items-center justify-center rounded-md text-xs sm:text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-8 sm:h-9 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2"
+                title="Logout"
               >
-                <LogOut className="mr-2 h-4 w-4" />
-                Logout
+                <LogOut className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Logout</span>
               </button>
             </div>
           ) : (
             <button
               onClick={login}
-              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-6 py-2 shadow-sm"
+              className="inline-flex items-center justify-center rounded-md text-xs sm:text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-8 sm:h-9 px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 shadow-sm"
             >
               Login
             </button>

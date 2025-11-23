@@ -40,7 +40,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
     {
       icon: ShoppingBag,
       title: "Trade Swag",
-      description: "Buy and sell exclusive hackathon merchandise from events worldwide"
+      description: "Swap exclusive hackathon merchandise from events worldwide"
     },
     {
       icon: Shield,
@@ -124,7 +124,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
                 transition={{ delay: 0.5, duration: 0.6 }}
                 className="text-xl text-muted-foreground mb-8 leading-relaxed max-w-lg"
               >
-                Buy and sell exclusive hackathon merchandise. Discover rare collectibles and connect with hackers globally.
+                Swap exclusive hackathon merchandise. Discover rare collectibles and connect with hackers globally.
               </motion.p>
 
               {/* Stats */}
@@ -178,7 +178,6 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
                   icon={ShoppingBag}
                   title="ETH Denver Hoodie"
                   subtitle="Limited Edition 2024"
-                  price="0.05 ETH"
                   tag="ETH Denver"
                   delay={0.5}
                 />
@@ -186,7 +185,6 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
                   icon={Shield}
                   title="Chainlink Cap"
                   subtitle="Official Swag"
-                  price="0.015 ETH"
                   tag="Chainlink"
                   delay={0.6}
                   className="mt-8"
@@ -195,7 +193,6 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
                   icon={Zap}
                   title="Base T-Shirt"
                   subtitle="Brand New"
-                  price="0.02 ETH"
                   tag="Base"
                   delay={0.7}
                 />
@@ -203,7 +200,6 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
                   icon={Globe}
                   title="Sticker Pack"
                   subtitle="Complete Set"
-                  price="0.005 ETH"
                   tag="Polygon"
                   delay={0.8}
                   className="mt-8"
@@ -287,7 +283,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
                 Ready to Start Trading?
               </h2>
               <p className="mx-auto max-w-2xl text-lg text-primary-foreground/80 mb-10">
-                Join thousands of hackers buying and selling exclusive hackathon merchandise.
+                Join thousands of hackers swapping exclusive hackathon merchandise.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
@@ -332,13 +328,12 @@ interface PreviewCardProps {
   icon: ElementType;
   title: string;
   subtitle: string;
-  price: string;
   tag: string;
   delay: number;
   className?: string;
 }
 
-function PreviewCard({ icon: Icon, title, subtitle, price, tag, delay, className = "" }: PreviewCardProps) {
+function PreviewCard({ icon: Icon, title, subtitle, tag, delay, className = "" }: PreviewCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -356,8 +351,7 @@ function PreviewCard({ icon: Icon, title, subtitle, price, tag, delay, className
       <div className="p-4">
         <h3 className="font-semibold text-sm mb-1">{title}</h3>
         <p className="text-xs text-muted-foreground mb-2">{subtitle}</p>
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-bold">{price}</span>
+        <div className="flex items-center justify-end">
           <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center">
             <ArrowRight className="w-3 h-3 text-muted-foreground" />
           </div>

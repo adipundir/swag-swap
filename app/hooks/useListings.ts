@@ -7,7 +7,6 @@ export interface Listing {
   id: string;
   title: string;
   description: string;
-  price: string;
   imageUrl?: string;
   seller: string;
   createdAt: string;

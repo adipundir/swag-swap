@@ -6,7 +6,6 @@ interface Listing {
   id: string;
   title: string;
   description: string;
-  price: string;
   imageUrl?: string;
   category: string;
   seller: string;
@@ -21,7 +20,6 @@ export async function GET(request: NextRequest) {
         id,
         title,
         description,
-        price,
         image_url as "imageUrl",
         category,
         seller,
@@ -34,7 +32,6 @@ export async function GET(request: NextRequest) {
       id: row.id,
       title: row.title,
       description: row.description,
-      price: row.price,
       imageUrl: row.imageUrl || undefined,
       category: row.category,
       seller: row.seller,
@@ -75,13 +72,13 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Validate required fields
-    const { title, description, price, category, seller } = body;
+    const { title, description, category, seller } = body;
 
-    if (!title || !description || !price || !category || !seller) {
+    if (!title || !description || !category || !seller) {
       return NextResponse.json(
         {
           success: false,
-          error: "Missing required fields: title, description, price, category, seller",
+          error: "Missing required fields: title, description, category, seller",
         },
         { status: 400 }
       );
@@ -103,13 +100,12 @@ export async function POST(request: NextRequest) {
 
     // Insert into Neon database
     const [newListing] = await sql`
-      INSERT INTO listings (title, description, price, image_url, category, seller, purchase_code)
-      VALUES (${title.trim()}, ${description.trim()}, ${price.trim()}, ${body.imageUrl?.trim() || null}, ${category.trim()}, ${seller.toLowerCase()}, ${purchaseCode})
+      INSERT INTO listings (title, description, image_url, category, seller, purchase_code)
+      VALUES (${title.trim()}, ${description.trim()}, ${body.imageUrl?.trim() || null}, ${category.trim()}, ${seller.toLowerCase()}, ${purchaseCode})
       RETURNING 
         id,
         title,
         description,
-        price,
         image_url as "imageUrl",
         category,
         seller,
@@ -121,7 +117,6 @@ export async function POST(request: NextRequest) {
       id: newListing.id,
       title: newListing.title,
       description: newListing.description,
-      price: newListing.price,
       imageUrl: newListing.imageUrl || undefined,
       category: newListing.category,
       seller: newListing.seller,

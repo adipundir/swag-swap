@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, ShoppingCart, MessageCircle, User, Calendar, DollarSign, Loader2, CheckCircle2, AlertCircle, Key } from "lucide-react";
+import { X, ShoppingCart, MessageCircle, User, Calendar, Loader2, CheckCircle2, AlertCircle, Key } from "lucide-react";
 import { Listing } from "./Listings";
 import { Chat } from "./Chat";
 
@@ -37,7 +37,7 @@ export function ListingDetailModal({ listing, isOpen, onClose, account, onPurcha
 
   const handleVerifyCode = async () => {
     if (!purchaseCode.trim()) {
-      setCodeError("Please enter a purchase code");
+      setCodeError("Please enter a swap code");
       return;
     }
 
@@ -62,7 +62,7 @@ export function ListingDetailModal({ listing, isOpen, onClose, account, onPurcha
         setCodeVerified(true);
         setCodeError(null);
       } else {
-        setCodeError(data.error || "Invalid purchase code");
+        setCodeError(data.error || "Invalid swap code");
         setCodeVerified(false);
       }
     } catch (err) {
@@ -75,12 +75,12 @@ export function ListingDetailModal({ listing, isOpen, onClose, account, onPurcha
 
   const handlePurchase = async () => {
     if (!account) {
-      setPurchaseError("Please connect your wallet to purchase");
+      setPurchaseError("Please connect your wallet to swap");
       return;
     }
 
     if (!codeVerified) {
-      setPurchaseError("Please verify the purchase code first");
+      setPurchaseError("Please verify the swap code first");
       return;
     }
 
@@ -96,7 +96,7 @@ export function ListingDetailModal({ listing, isOpen, onClose, account, onPurcha
         handleClose();
       }, 2000);
     } catch (err) {
-      setPurchaseError(err instanceof Error ? err.message : "Purchase failed");
+      setPurchaseError(err instanceof Error ? err.message : "Swap failed");
     } finally {
       setPurchasing(false);
     }
@@ -112,27 +112,27 @@ export function ListingDetailModal({ listing, isOpen, onClose, account, onPurcha
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in-0 duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/50 backdrop-blur-sm animate-in fade-in-0 duration-200"
       onClick={handleBackdropClick}
     >
-      <div className="relative w-full max-w-4xl max-h-[90vh] bg-card border border-border rounded-xl shadow-xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-4xl max-h-[95vh] sm:max-h-[90vh] bg-card border border-border rounded-xl shadow-xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-border">
-          <h2 className="text-xl sm:text-2xl font-semibold line-clamp-1 pr-4">{listing.title}</h2>
+        <div className="flex items-center justify-between p-3 sm:p-4 lg:p-6 border-b border-border">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold line-clamp-1 pr-2 sm:pr-4">{listing.title}</h2>
           <button
             onClick={handleClose}
-            className="shrink-0 p-2 hover:bg-muted rounded-lg transition-colors"
+            className="shrink-0 p-1.5 sm:p-2 hover:bg-muted rounded-lg transition-colors"
             aria-label="Close"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-4 sm:p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 p-3 sm:p-4 lg:p-6">
             {/* Left Column - Image */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div className="aspect-square rounded-lg overflow-hidden bg-muted border border-border">
                 {listing.imageUrl ? (
                   <img
@@ -142,48 +142,39 @@ export function ListingDetailModal({ listing, isOpen, onClose, account, onPurcha
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <ShoppingCart className="w-16 h-16 text-muted-foreground/30" />
+                    <ShoppingCart className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground/30" />
                   </div>
                 )}
-              </div>
-
-              {/* Price Badge */}
-              <div className="flex items-center gap-2 p-4 bg-primary/10 border border-primary/20 rounded-lg">
-                <DollarSign className="w-5 h-5 text-primary" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Price</p>
-                  <p className="text-2xl font-bold text-primary">{listing.price}</p>
-                </div>
               </div>
             </div>
 
             {/* Right Column - Details */}
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {/* Description */}
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-2">Description</h3>
-                <p className="text-foreground whitespace-pre-wrap">{listing.description}</p>
+                <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-2">Description</h3>
+                <p className="text-sm sm:text-base text-foreground whitespace-pre-wrap">{listing.description}</p>
               </div>
 
               {/* Swapper Info */}
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                  <div className="p-2 bg-background rounded-lg">
-                    <User className="w-4 h-4 text-muted-foreground" />
+              <div className="space-y-2 sm:space-y-3">
+                <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-muted/50 rounded-lg">
+                  <div className="p-1.5 sm:p-2 bg-background rounded-lg shrink-0">
+                    <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground">Swapper</p>
-                    <p className="text-sm font-mono truncate">{listing.seller}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">Swapper</p>
+                    <p className="text-xs sm:text-sm font-mono truncate">{listing.seller}</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                  <div className="p-2 bg-background rounded-lg">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-muted/50 rounded-lg">
+                  <div className="p-1.5 sm:p-2 bg-background rounded-lg shrink-0">
+                    <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground">Listed</p>
-                    <p className="text-sm">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground">Listed</p>
+                    <p className="text-xs sm:text-sm">
                       {new Date(listing.createdAt).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "long",
@@ -196,23 +187,24 @@ export function ListingDetailModal({ listing, isOpen, onClose, account, onPurcha
 
               {/* Swap/Trade Section */}
               {!isOwnListing && (
-                <div className="space-y-3 pt-4 border-t border-border">
+                <div className="space-y-2 sm:space-y-3 pt-3 sm:pt-4 border-t border-border">
                   <button
                     onClick={() => setShowChat(!showChat)}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-6"
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-md text-xs sm:text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-10 sm:h-12 px-4 sm:px-6"
                   >
-                    <MessageCircle className="w-4 h-4" />
-                    {showChat ? "Hide Chat" : "Message to Swap/Trade"}
+                    <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                    <span className="hidden sm:inline">{showChat ? "Hide Chat" : "Message to Swap/Trade"}</span>
+                    <span className="sm:hidden">{showChat ? "Hide Chat" : "Message to Swap"}</span>
                   </button>
-                  <p className="text-xs text-center text-muted-foreground">
+                  <p className="text-[10px] sm:text-xs text-center text-muted-foreground px-2">
                     Chat with the swapper to arrange a trade or swap
                   </p>
                 </div>
               )}
 
               {isOwnListing && (
-                <div className="p-4 bg-muted/50 border border-border rounded-lg text-center">
-                  <p className="text-sm text-muted-foreground">This is your listing</p>
+                <div className="p-3 sm:p-4 bg-muted/50 border border-border rounded-lg text-center">
+                  <p className="text-xs sm:text-sm text-muted-foreground">This is your listing</p>
                 </div>
               )}
             </div>
@@ -220,7 +212,7 @@ export function ListingDetailModal({ listing, isOpen, onClose, account, onPurcha
 
           {/* Chat Section */}
           {showChat && (
-            <div className="border-t border-border p-4 sm:p-6">
+            <div className="border-t border-border p-3 sm:p-4 lg:p-6">
               <Chat sellerAddress={listing.seller} listingTitle={listing.title} />
             </div>
           )}
