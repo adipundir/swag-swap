@@ -24,3 +24,12 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Privy modal fixes */
+#privy-modal-content p {
+  display: inline;
+}
+
+#privy-modal-content div {
+  display: block;
+}
