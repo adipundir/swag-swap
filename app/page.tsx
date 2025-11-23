@@ -1,16 +1,14 @@
 "use client";
 
 import { Listings } from "./components/Listings";
-import { FundWallet } from "./components/FundWallet";
 import { CreateListing } from "./components/CreateListing";
-import { VerifyHackerButtonWorldID } from "./components/VerifyHackerButtonWorldID";
 import { LandingPage } from "./components/LandingPage";
 import { useState } from "react";
-import { ShoppingBag, PlusCircle, ShieldCheck } from "lucide-react";
+import { ShoppingBag, PlusCircle } from "lucide-react";
 
 export default function Home() {
   const [showApp, setShowApp] = useState(false);
-  const [activeTab, setActiveTab] = useState<"browse" | "create" | "verify">("browse");
+  const [activeTab, setActiveTab] = useState<"browse" | "create">("browse");
 
   if (!showApp) {
     return <LandingPage onGetStarted={() => setShowApp(true)} />;
@@ -47,18 +45,6 @@ export default function Home() {
               <span className="hidden sm:inline">Create Listing</span>
               <span className="sm:hidden">Create</span>
             </button>
-            <button
-              onClick={() => setActiveTab("verify")}
-              className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 sm:px-8 py-2 text-xs sm:text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
-                activeTab === "verify"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "hover:bg-background/50 hover:text-foreground"
-              }`}
-            >
-              <ShieldCheck className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Verify Hacker</span>
-              <span className="sm:hidden">Verify</span>
-            </button>
           </div>
         </div>
 
@@ -66,15 +52,10 @@ export default function Home() {
         <div className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 ease-out">
           {activeTab === "browse" ? (
             <div className="space-y-8">
-              <FundWallet />
               <Listings />
             </div>
-          ) : activeTab === "create" ? (
-            <CreateListing />
           ) : (
-            <div className="max-w-2xl mx-auto">
-              <VerifyHackerButtonWorldID />
-            </div>
+            <CreateListing />
           )}
         </div>
       </div>

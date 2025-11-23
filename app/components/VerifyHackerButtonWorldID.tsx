@@ -31,6 +31,29 @@ export function VerifyHackerButtonWorldID() {
 
   const walletAddress = wallets[0]?.address;
 
+  // Validate environment variable is set
+  if (!process.env.NEXT_PUBLIC_WORLD_APP_ID) {
+    console.error("❌ NEXT_PUBLIC_WORLD_APP_ID is not set in environment variables");
+    return (
+      <div className="p-6 border-2 border-red-500/50 rounded-lg bg-red-50 dark:bg-red-900/20">
+        <div className="flex items-start gap-4">
+          <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
+          <div className="flex-1">
+            <h3 className="font-semibold text-red-900 dark:text-red-100 mb-1">
+              Configuration Error
+            </h3>
+            <p className="text-sm text-red-700 dark:text-red-300">
+              NEXT_PUBLIC_WORLD_APP_ID is not set. Please add it to your .env.local file.
+            </p>
+            <code className="text-xs bg-red-100 dark:bg-red-900/40 px-2 py-1 rounded mt-2 block">
+              NEXT_PUBLIC_WORLD_APP_ID=app_76566af9071b7531534fa11af3e66e38
+            </code>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Check verification status on mount
   useEffect(() => {
     if (walletAddress) {
@@ -210,8 +233,8 @@ export function VerifyHackerButtonWorldID() {
         </div>
 
         <IDKitWidget
-          app_id={(process.env.NEXT_PUBLIC_WORLD_APP_ID || "app_staging_0000000000000000000000000000") as `app_${string}`}
-          action="verify-hacker"
+          app_id={process.env.NEXT_PUBLIC_WORLD_APP_ID as `app_${string}`}
+          action="humanhood"
           verification_level={VerificationLevel.Orb}
           handleVerify={handleVerifySuccess}
           onSuccess={() => {

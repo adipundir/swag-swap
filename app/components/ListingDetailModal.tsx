@@ -165,14 +165,14 @@ export function ListingDetailModal({ listing, isOpen, onClose, account, onPurcha
                 <p className="text-foreground whitespace-pre-wrap">{listing.description}</p>
               </div>
 
-              {/* Seller Info */}
+              {/* Swapper Info */}
               <div className="space-y-3">
                 <div className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
                   <div className="p-2 bg-background rounded-lg">
                     <User className="w-4 h-4 text-muted-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground">Seller</p>
+                    <p className="text-xs text-muted-foreground">Swapper</p>
                     <p className="text-sm font-mono truncate">{listing.seller}</p>
                   </div>
                 </div>
@@ -194,113 +194,19 @@ export function ListingDetailModal({ listing, isOpen, onClose, account, onPurcha
                 </div>
               </div>
 
-              {/* Purchase Section */}
+              {/* Swap/Trade Section */}
               {!isOwnListing && (
                 <div className="space-y-3 pt-4 border-t border-border">
-                  {/* Purchase Code Input */}
-                  {!codeVerified ? (
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-sm font-medium text-foreground mb-2 block">
-                          Purchase Code
-                        </label>
-                        <p className="text-xs text-muted-foreground mb-3">
-                          Enter the purchase code provided by the seller to proceed with the purchase.
-                        </p>
-                        <div className="flex gap-2">
-                          <div className="relative flex-1">
-                            <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <input
-                              type="text"
-                              value={purchaseCode}
-                              onChange={(e) => {
-                                setPurchaseCode(e.target.value.toUpperCase().slice(0, 6));
-                                setCodeError(null);
-                              }}
-                              placeholder="Enter 6-digit code"
-                              maxLength={6}
-                              className="flex h-12 w-full rounded-md border border-input bg-background pl-10 pr-3 py-2 text-sm font-mono tracking-widest ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                            />
-                          </div>
-                          <button
-                            onClick={handleVerifyCode}
-                            disabled={verifyingCode || !purchaseCode.trim() || purchaseCode.length !== 6}
-                            className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-6 shrink-0"
-                          >
-                            {verifyingCode ? (
-                              <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                Verifying...
-                              </>
-                            ) : (
-                              "Verify"
-                            )}
-                          </button>
-                        </div>
-                        {codeError && (
-                          <div className="mt-2 p-2 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-2">
-                            <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
-                            <p className="text-xs text-destructive">{codeError}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <p className="text-sm text-green-600 dark:text-green-400 font-medium">Code verified!</p>
-                        <p className="text-xs text-green-600/80 dark:text-green-400/80 mt-1">
-                          You can now proceed with the purchase.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {purchaseError && (
-                    <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-2">
-                      <AlertCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
-                      <p className="text-sm text-destructive">{purchaseError}</p>
-                    </div>
-                  )}
-
-                  {purchaseSuccess && (
-                    <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg flex items-start gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
-                      <p className="text-sm text-green-600 dark:text-green-400">Purchase successful!</p>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={handlePurchase}
-                    disabled={purchasing || purchaseSuccess || !codeVerified}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-6"
-                  >
-                    {purchasing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Processing...
-                      </>
-                    ) : purchaseSuccess ? (
-                      <>
-                        <CheckCircle2 className="w-4 h-4" />
-                        Purchased
-                      </>
-                    ) : (
-                      <>
-                        <ShoppingCart className="w-4 h-4" />
-                        swap/trade
-                      </>
-                    )}
-                  </button>
-
                   <button
                     onClick={() => setShowChat(!showChat)}
-                    className="w-full inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-border bg-background hover:bg-muted h-12 px-6"
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-12 px-6"
                   >
                     <MessageCircle className="w-4 h-4" />
-                    {showChat ? "Hide Chat" : "Message Seller"}
+                    {showChat ? "Hide Chat" : "Message to Swap/Trade"}
                   </button>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Chat with the swapper to arrange a trade or swap
+                  </p>
                 </div>
               )}
 

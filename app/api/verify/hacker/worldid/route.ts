@@ -47,17 +47,35 @@ async function verifyWorldIDProof(payload: WorldIDProofPayload): Promise<{
     console.log("   Nullifier hash:", payload.nullifier_hash);
     console.log("   Verification level:", payload.verification_level);
 
-    const app_id = process.env.NEXT_PUBLIC_WORLD_APP_ID || process.env.WORLD_APP_ID;
-    const action = "verify-hacker";
+    const app_id = process.env.WORLD_APP_ID;
+    // Action must match what's configured in World ID Developer Portal
+    const action = "humanhood";
+
+    console.log("🔐 Environment check:");
+    console.log("   app_id:", app_id ? `${app_id.slice(0, 15)}...` : "NOT SET");
+    console.log("   action:", action);
 
     if (!app_id) {
+      console.error("❌ app_id is not configured!");
       return {
         success: false,
-        error: "World ID app_id not configured. Please set NEXT_PUBLIC_WORLD_APP_ID in your environment.",
+        error: "World ID app_id not configured. Please set NEXT_PUBLIC_WORLD_APP_ID=app_76566af9071b7531534fa11af3e66e38 in your .env.local file.",
       };
     }
 
     // Verify the proof with World ID Developer Portal API
+    const verifyPayload = {
+      merkle_root: payload.merkle_root,
+      nullifier_hash: payload.nullifier_hash,
+      proof: payload.proof,
+      verification_level: payload.verification_level,
+      action: action,
+    };
+
+    console.log("📤 Sending to World ID API:");
+    console.log("   URL:", `https://developer.worldcoin.org/api/v1/verify/${app_id}`);
+    console.log("   Payload:", JSON.stringify(verifyPayload, null, 2));
+
     const response = await fetch(
       `https://developer.worldcoin.org/api/v1/verify/${app_id}`,
       {
@@ -65,19 +83,19 @@ async function verifyWorldIDProof(payload: WorldIDProofPayload): Promise<{
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          merkle_root: payload.merkle_root,
-          nullifier_hash: payload.nullifier_hash,
-          proof: payload.proof,
-          verification_level: payload.verification_level,
-          action: action,
-        }),
+        body: JSON.stringify(verifyPayload),
       }
     );
 
+    console.log("📥 SERVER: World ID API response status:", response.status);
+    console.log("   Response OK:", response.ok);
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ detail: "Verification failed" }));
-      console.error("❌ World ID API returned error:", errorData);
+      console.error("\n❌ SERVER: World ID API returned error!");
+      console.error("   Status:", response.status);
+      console.error("   Error data:", JSON.stringify(errorData, null, 2));
+      console.error("========================================\n");
       return {
         success: false,
         error: errorData.detail || errorData.error || `Verification failed with status ${response.status}`,
@@ -85,12 +103,16 @@ async function verifyWorldIDProof(payload: WorldIDProofPayload): Promise<{
     }
 
     const data = await response.json();
+    console.log("📥 SERVER: World ID API response data:", JSON.stringify(data, null, 2));
 
     if (data.success === true) {
-      console.log("✅ World ID proof verified successfully");
+      console.log("✅ SERVER: World ID proof verified successfully!");
+      console.log("========================================\n");
       return { success: true };
     } else {
-      console.error("❌ World ID verification failed:", data);
+      console.error("\n❌ SERVER: World ID verification failed!");
+      console.error("   Response data:", data);
+      console.error("========================================\n");
       return {
         success: false,
         error: data.detail || data.code || "World ID proof is invalid",
@@ -112,9 +134,14 @@ export async function POST(request: NextRequest) {
   try {
     const body: WorldIDProofPayload = await request.json();
 
-    console.log("📥 Received World ID proof for verification");
+    console.log("\n========================================");
+    console.log("📥 SERVER: Received World ID proof for verification");
+    console.log("========================================");
     console.log("   Wallet:", body.walletAddress);
     console.log("   Verification level:", body.verification_level);
+    console.log("   Nullifier hash:", body.nullifier_hash?.slice(0, 30) + "...");
+    console.log("   Merkle root:", body.merkle_root?.slice(0, 30) + "...");
+    console.log("   Proof length:", body.proof?.length);
 
     // Validate input
     if (!body.proof || !body.nullifier_hash || !body.merkle_root || !body.walletAddress) {

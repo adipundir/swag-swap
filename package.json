@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "^4.3.7",
-    "@coinbase/x402": "^0.7.3",
     "@neondatabase/serverless": "^1.0.2",
     "@privy-io/react-auth": "^3.7.0",
     "@vercel/blob": "^2.0.0",
