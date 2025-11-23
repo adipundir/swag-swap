@@ -17,44 +17,23 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     },
     supportedChains: [
       {
-        id: 80002,
-        name: "Polygon Amoy",
-        network: "polygon-amoy",
+        id: 84532,
+        name: "Base Sepolia",
+        network: "base-sepolia",
         nativeCurrency: {
-          name: "MATIC",
-          symbol: "MATIC",
+          name: "ETH",
+          symbol: "ETH",
           decimals: 18,
         },
         rpcUrls: {
           default: {
-            http: ["https://rpc-amoy.polygon.technology"],
+            http: ["https://sepolia.base.org"],
           },
         },
         blockExplorers: {
           default: {
-            name: "PolygonScan",
-            url: "https://amoy.polygonscan.com",
-          },
-        },
-      },
-      {
-        id: 44787,
-        name: "Celo Alfajores",
-        network: "celo-alfajores",
-        nativeCurrency: {
-          name: "CELO",
-          symbol: "CELO",
-          decimals: 18,
-        },
-        rpcUrls: {
-          default: {
-            http: ["https://alfajores-forno.celo-testnet.org"],
-          },
-        },
-        blockExplorers: {
-          default: {
-            name: "Celo Explorer",
-            url: "https://alfajores.celoscan.io",
+            name: "BaseScan",
+            url: "https://sepolia-explorer.base.org",
           },
         },
       },

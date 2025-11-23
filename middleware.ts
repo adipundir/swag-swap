@@ -13,7 +13,7 @@ export const middleware = paymentMiddleware(
     // Protected API route configuration
     "/api/listings": {
       price: "$0.0001", // Price in USD (equivalent to ~0.0001 USDC)
-      network: "polygon-amoy", // Polygon Amoy testnet with facilitator.x402.rs
+      network: "base-sepolia", // Base Sepolia testnet with facilitator.x402.rs
     },
   }
 );
