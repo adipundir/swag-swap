@@ -289,7 +289,7 @@ export function ListingDetailModal({ listing, isOpen, onClose, account, onPurcha
                     ) : (
                       <>
                         <ShoppingCart className="w-4 h-4" />
-                        Purchase Now
+                        swap/trade
                       </>
                     )}
                   </button>

@@ -1,5 +1,6 @@
 import { paymentMiddleware } from "x402-next";
 import { NextRequest, NextResponse } from "next/server";
+import { facilitatorConfig } from "@/app/lib/facilitator";
 
 // Validate required environment variable
 if (!process.env.RECEIVER_WALLET_ADDRESS) {
@@ -7,7 +8,7 @@ if (!process.env.RECEIVER_WALLET_ADDRESS) {
 }
 
 // Create the x402 payment middleware
-// Using official CDP x402 facilitator for testnet
+// Using CDP facilitator from @coinbase/x402
 const x402Middleware = paymentMiddleware(
   // Your wallet address where you receive payments
   process.env.RECEIVER_WALLET_ADDRESS as `0x${string}`,
@@ -18,10 +19,7 @@ const x402Middleware = paymentMiddleware(
       network: "base-sepolia", // Base Sepolia testnet
     },
   },
-  {
-    // Facilitator configuration - use official CDP facilitator for testnet
-    url: "https://x402.org/facilitator", // Official x402 facilitator for testnet (Base Sepolia)
-  }
+  facilitatorConfig // Use public facilitator for testnet, CDP facilitator for mainnet
 );
 
 // Wrap middleware to only protect GET requests

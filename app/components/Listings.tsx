@@ -43,7 +43,7 @@ export function Listings() {
   const [apiUrl, setApiUrl] = useState<string>(
     process.env.NEXT_PUBLIC_LISTINGS_API_URL || "/api/listings"
   );
-  const [maxPayment, setMaxPayment] = useState<string>("100000000000000"); // 0.0001 ETH default (in wei)
+  const [maxPayment, setMaxPayment] = useState<string>("110"); // 0.0001 USDC default with 10% buffer (USDC has 6 decimals, so 0.0001 USDC = 100 units, we use 110 for safety)
   const [switchingNetwork, setSwitchingNetwork] = useState(false);
   const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -243,10 +243,15 @@ export function Listings() {
     // 2. Detecting 402 Payment Required responses
     // 3. Signing payment authorization with the wallet
     // 4. Retrying request with X-PAYMENT header
+    // Note: maxValue should be in USDC smallest units (6 decimals)
+    // 0.0001 USDC = 100 units, but we add a small buffer (10%) to account for any rounding
+    const maxPaymentValue = BigInt(maxPayment);
+    const bufferedMaxPayment = (maxPaymentValue * BigInt(110)) / BigInt(100); // Add 10% buffer
+    
     const fetchWithPayment = wrapFetchWithPayment(
       fetch,
       walletClient as any, // viem wallet client implements x402 Signer interface
-      BigInt(maxPayment) // maxValue in wei (0.0001 ETH = 100000000000000 wei)
+      bufferedMaxPayment // maxValue in USDC smallest units with 10% buffer
     );
 
     return fetchWithPayment;
@@ -286,7 +291,7 @@ export function Listings() {
       console.log("Making request to:", apiUrl);
       console.log("Wallet address:", account);
       console.log("Current chain ID:", chainId);
-      console.log("Max payment (wei):", maxPayment);
+      console.log("Max payment (USDC units):", maxPayment);
       
       // Get x402-enabled fetch function
       const fetchWithPayment = getX402Fetch();
@@ -340,12 +345,31 @@ export function Listings() {
             const maxAmount = parsedError?.accepts?.[0]?.maxAmountRequired || "unknown";
             detailedError += "⚠️ Insufficient USDC Balance: x402 payments require USDC tokens, not ETH.\n\n";
             detailedError += "x402 payments on Base Sepolia use USDC (stablecoin), not ETH.\n";
-            detailedError += `Required amount: ${maxAmount} USDC wei\n\n`;
+            detailedError += `Required amount: ${maxAmount} USDC units\n\n`;
             detailedError += "To get USDC on Base Sepolia:\n";
             detailedError += "1. Use a Base Sepolia USDC faucet (search online)\n";
             detailedError += "2. Bridge USDC from another network to Base Sepolia\n";
             detailedError += "3. Swap ETH for USDC on Base Sepolia using a DEX like Uniswap\n\n";
             detailedError += "Note: You have ETH, but x402 payments require USDC tokens.\n";
+          } else if (parsedError?.error === "invalid_exact_evm_payload_authorization_value_too_low") {
+            const maxAmount = parsedError?.accepts?.[0]?.maxAmountRequired || "unknown";
+            const asset = parsedError?.accepts?.[0]?.asset || "USDC";
+            detailedError += "⚠️ Payment Amount Too Low: The max payment value is below the required amount.\n\n";
+            detailedError += `Required asset: ${asset} (USDC on Base Sepolia)\n`;
+            detailedError += `Required amount: ${maxAmount} USDC units (0.0001 USDC)\n`;
+            detailedError += `Your max payment: ${maxPayment} USDC units\n\n`;
+            detailedError += "x402 payments require USDC tokens, not ETH.\n";
+            detailedError += "The payment amount must be at least the required value in USDC.\n\n";
+            detailedError += "To fix this:\n";
+            detailedError += `1. Update the max payment to at least ${maxAmount} USDC units\n`;
+            detailedError += "2. Ensure you have USDC tokens in your wallet (not just ETH)\n";
+            detailedError += "3. Get USDC from a Base Sepolia faucet or swap ETH for USDC\n";
+            
+            // Auto-update maxPayment if it's too low
+            if (maxAmount !== "unknown" && BigInt(maxPayment) < BigInt(maxAmount)) {
+              const recommendedAmount = (BigInt(maxAmount) * BigInt(110) / BigInt(100)).toString(); // 10% buffer
+              detailedError += `\n💡 Tip: Try setting max payment to ${recommendedAmount} USDC units (10% above required amount)\n`;
+            }
           } else if (parsedError?.error === "invalid_exact_evm_payload_signature" || 
               parsedError?.error?.includes("not valid JSON") ||
               parsedError?.error?.includes("Unexpected token")) {
@@ -534,18 +558,18 @@ export function Listings() {
 
           <div className="space-y-2">
             <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Max Payment (Wei)
+              Max Payment (USDC units)
             </label>
             <div className="relative">
               <input
                 type="text"
                 value={maxPayment}
                 onChange={(e) => setMaxPayment(e.target.value)}
-                placeholder="100000000000000"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-16"
+                placeholder="100"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-20"
               />
               <span className="absolute right-3 top-3 text-xs text-muted-foreground pointer-events-none">
-                Wei
+                USDC
               </span>
             </div>
           </div>
@@ -567,7 +591,7 @@ export function Listings() {
         </div>
         
         <div className="mt-2 text-[10px] text-muted-foreground text-right">
-          Payment amount: ~0.0001 ETH ($0.0001 USD)
+          Payment amount: ~0.0001 USDC ($0.0001 USD) - Requires USDC tokens on Base Sepolia
         </div>
 
         {error && (
