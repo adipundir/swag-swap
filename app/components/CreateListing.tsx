@@ -10,7 +10,6 @@ interface ListingFormData {
   description: string;
   price: string;
   imageUrl: string;
-  imageCid: string;
   category: string;
 }
 
@@ -23,7 +22,6 @@ export function CreateListing() {
     description: "",
     price: "",
     imageUrl: "",
-    imageCid: "",
     category: "clothing",
   });
 
@@ -72,7 +70,6 @@ export function CreateListing() {
         description: "",
         price: "",
         imageUrl: "",
-        imageCid: "",
         category: "clothing",
       });
 
@@ -225,7 +222,7 @@ export function CreateListing() {
             />
           </div>
 
-          {/* File Upload to Filecoin */}
+          {/* File Upload */}
           <div className="space-y-3 pt-4 border-t border-border/60">
              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2">
               <Upload className="w-3.5 h-3.5" />
@@ -233,8 +230,8 @@ export function CreateListing() {
             </label>
             <div className="bg-muted/30 rounded-lg border border-dashed border-border p-4">
               <FileUpload
-                onUploadComplete={(url, cid) => {
-                  setFormData({ ...formData, imageUrl: url, imageCid: cid });
+                onUploadComplete={(url) => {
+                  setFormData({ ...formData, imageUrl: url });
                   setError(null);
                 }}
                 onUploadStart={() => {
@@ -283,7 +280,7 @@ export function CreateListing() {
         <div className="px-6 py-4 bg-muted/30 border-t border-border/60 rounded-b-xl">
           <p className="text-xs text-muted-foreground text-center">
             <strong className="font-medium text-foreground">Note:</strong> Your wallet address will be publicly visible
-            as the seller. Images are permanently stored on the Filecoin network.
+            as the seller. Images are stored in the database.
           </p>
         </div>
       </div>

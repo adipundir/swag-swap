@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { uploadToFilecoin } from "../lib/filecoin";
-import { Image as ImageIcon, X, UploadCloud, Check, Loader2 } from "lucide-react";
+import { X, UploadCloud, Check, Loader2 } from "lucide-react";
 
 interface FileUploadProps {
-  onUploadComplete: (url: string, cid: string) => void;
+  onUploadComplete: (url: string) => void;
   onUploadStart?: () => void;
   onError?: (error: string) => void;
 }
@@ -15,8 +14,8 @@ export function FileUpload({
   onUploadStart,
   onError,
 }: FileUploadProps) {
-  const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,20 +34,34 @@ export function FileUpload({
       return;
     }
 
-    // Show preview
+    // Show preview immediately
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreview(reader.result as string);
     };
     reader.readAsDataURL(file);
 
-    // Upload to Filecoin
+    // Upload to Vercel Blob
     setUploading(true);
     onUploadStart?.();
 
     try {
-      const { cid, url } = await uploadToFilecoin(file);
-      onUploadComplete(url, cid);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to upload file");
+      }
+
+      const data = await response.json();
+      onUploadComplete(data.url);
+      setPreview(data.url); // Update preview to use the blob URL
     } catch (error) {
       console.error("Upload error:", error);
       onError?.(
@@ -113,25 +126,25 @@ export function FileUpload({
           {uploading ? (
             <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex flex-col items-center justify-center">
               <Loader2 className="w-8 h-8 animate-spin text-primary mb-2" />
-              <p className="text-foreground text-sm font-medium">Uploading to Filecoin...</p>
+              <p className="text-foreground text-sm font-medium">Uploading to Vercel Blob...</p>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={handleClear}
-              className="absolute top-2 right-2 p-1.5 bg-background/90 hover:bg-background text-destructive rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
+            <>
+              <button
+                type="button"
+                onClick={handleClear}
+                className="absolute top-2 right-2 p-1.5 bg-background/90 hover:bg-background text-destructive rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="w-4 h-4" />
+              </button>
 
-          {!uploading && (
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-               <div className="flex items-center gap-1.5 text-xs text-white font-medium">
-                <Check className="w-3.5 h-3.5 text-green-400" />
-                Stored on Filecoin Onchain Cloud
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+                <div className="flex items-center gap-1.5 text-xs text-white font-medium">
+                  <Check className="w-3.5 h-3.5 text-green-400" />
+                  Stored on Vercel Blob
+                </div>
               </div>
-            </div>
+            </>
           )}
         </div>
       )}

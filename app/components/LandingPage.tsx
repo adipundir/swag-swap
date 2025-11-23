@@ -44,8 +44,8 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
     },
     {
       icon: Shield,
-      title: "Decentralized Storage",
-      description: "Your listings stored permanently on Filecoin's decentralized network"
+      title: "Secure Database",
+      description: "Your listings stored securely in Neon PostgreSQL database"
     },
     {
       icon: Zap,
@@ -63,7 +63,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
     {
       icon: Upload,
       title: "Create Listing",
-      description: "Upload your hackathon swag with images stored on Filecoin"
+      description: "Upload your hackathon swag with images stored in the database"
     },
     {
       icon: Search,
