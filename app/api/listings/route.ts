@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
   });
 }
 
-// POST /api/listings - Create a new listing (not protected by x402)
+// POST /api/listings - Create a new listing
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -152,4 +152,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

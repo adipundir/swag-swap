@@ -1,6 +1,6 @@
 "use client";
 
-import { useX402Fetch, useWallets, usePrivy } from "@privy-io/react-auth";
+import { usePrivy, useWallets, useX402Fetch } from "@privy-io/react-auth";
 import { useState } from "react";
 import { Search, DollarSign, AlertCircle, Loader2, ShoppingBag, ArrowRight } from "lucide-react";
 
@@ -23,7 +23,7 @@ export function Listings() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [apiUrl, setApiUrl] = useState<string>(
-    process.env.NEXT_PUBLIC_LISTINGS_API_URL || "http://localhost:3000/api/listings"
+    process.env.NEXT_PUBLIC_LISTINGS_API_URL || "/api/listings"
   );
   const [maxPayment, setMaxPayment] = useState<string>("1000000"); // 1 USDC default
 
@@ -110,7 +110,7 @@ export function Listings() {
               type="text"
               value={apiUrl}
               onChange={(e) => setApiUrl(e.target.value)}
-              placeholder="https://api.example.com/listings"
+              placeholder="/api/listings"
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>

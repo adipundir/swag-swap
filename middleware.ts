@@ -13,7 +13,7 @@ export const middleware = paymentMiddleware(
     // Protected API route configuration
     "/api/listings": {
       price: "$0.0001", // Price in USD (equivalent to ~0.0001 USDC)
-      network: "base-sepolia", // Base Sepolia testnet with facilitator.x402.rs
+      network: "base-sepolia", // Base Sepolia testnet
     },
   }
 );
@@ -22,8 +22,7 @@ export const middleware = paymentMiddleware(
 // Only protect GET requests to /api/listings
 // POST requests (creating listings) are not protected
 export const config = {
-  matcher: [
-    "/api/listings",
-  ],
+  matcher: ["/api/listings"],
+  runtime: "nodejs", // Use Node.js runtime instead of Edge to avoid size limits
 };
 
