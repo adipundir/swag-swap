@@ -21,40 +21,43 @@ export default function Home() {
       <div className="container max-w-6xl mx-auto px-4">
         
         {/* Tab Navigation */}
-        <div className="flex flex-col items-center mb-10 space-y-4">
-          <div className="inline-flex h-12 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground shadow-inner">
+        <div className="flex flex-col items-center mb-6 sm:mb-10 space-y-4">
+          <div className="inline-flex h-auto sm:h-12 flex-wrap sm:flex-nowrap items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground shadow-inner gap-1 sm:gap-0">
             <button
               onClick={() => setActiveTab("browse")}
-              className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-8 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+              className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 sm:px-8 py-2 text-xs sm:text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
                 activeTab === "browse"
                   ? "bg-background text-foreground shadow-sm"
                   : "hover:bg-background/50 hover:text-foreground"
               }`}
             >
-              <ShoppingBag className="mr-2 h-4 w-4" />
-              Browse Listings
+              <ShoppingBag className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Browse Listings</span>
+              <span className="sm:hidden">Browse</span>
             </button>
             <button
               onClick={() => setActiveTab("create")}
-              className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-8 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+              className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 sm:px-8 py-2 text-xs sm:text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
                 activeTab === "create"
                   ? "bg-background text-foreground shadow-sm"
                   : "hover:bg-background/50 hover:text-foreground"
               }`}
             >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Create Listing
+              <PlusCircle className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Create Listing</span>
+              <span className="sm:hidden">Create</span>
             </button>
             <button
               onClick={() => setActiveTab("verify")}
-              className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-8 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+              className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 sm:px-8 py-2 text-xs sm:text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
                 activeTab === "verify"
                   ? "bg-background text-foreground shadow-sm"
                   : "hover:bg-background/50 hover:text-foreground"
               }`}
             >
-              <ShieldCheck className="mr-2 h-4 w-4" />
-              Verify Hacker
+              <ShieldCheck className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Verify Hacker</span>
+              <span className="sm:hidden">Verify</span>
             </button>
           </div>
         </div>
