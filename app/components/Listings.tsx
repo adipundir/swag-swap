@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { Search, DollarSign, AlertCircle, Loader2, ShoppingBag, ArrowRight, RefreshCw } from "lucide-react";
 import { createWalletClient, custom, Chain, createPublicClient, http, formatEther, type Address } from "viem";
 import { baseSepolia } from "viem/chains";
+import { ListingDetailModal } from "./ListingDetailModal";
 
 export interface Listing {
   id: string;
@@ -44,6 +45,8 @@ export function Listings() {
   );
   const [maxPayment, setMaxPayment] = useState<string>("100000000000000"); // 0.0001 ETH default (in wei)
   const [switchingNetwork, setSwitchingNetwork] = useState(false);
+  const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Initialize Coinbase Wallet SDK
   useEffect(() => {
@@ -426,6 +429,30 @@ export function Listings() {
     }
   };
 
+  const handlePurchase = async (listingId: string) => {
+    // Simulate purchase process - in a real app, this would interact with a smart contract or API
+    return new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        // Simulate success/failure (90% success rate for demo)
+        if (Math.random() > 0.1) {
+          resolve();
+        } else {
+          reject(new Error("Purchase failed. Please try again."));
+        }
+      }, 1500);
+    });
+  };
+
+  const handleListingClick = (listing: Listing) => {
+    setSelectedListing(listing);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedListing(null);
+  };
+
   if (!authenticated) {
     return (
       <div className="w-full p-8 border border-dashed rounded-lg bg-muted/30 flex flex-col items-center justify-center text-center">
@@ -491,20 +518,7 @@ export function Listings() {
           </div>
         </div>
         
-        {/* CDP Wallet Info */}
-        <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-          <div className="flex items-start gap-2 text-xs text-blue-600 dark:text-blue-500">
-            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium mb-1">Using CDP Wallet (Coinbase Wallet)</p>
-              <p className="text-muted-foreground">
-                Currently testing with Coinbase Wallet. Privy code is commented out and can be restored later.
-              </p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="grid md:grid-cols-[2fr_1fr_auto] gap-4 items-end">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[2fr_1fr_auto] gap-4 items-end">
           <div className="space-y-2">
             <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               API URL
@@ -539,7 +553,7 @@ export function Listings() {
           <button
             onClick={handleFetchListings}
             disabled={loading || !apiUrl}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6"
+            className="sm:col-span-2 md:col-span-1 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -559,7 +573,7 @@ export function Listings() {
         {error && (
           <div className="mt-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
             <div className="flex items-start gap-3 text-sm">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="font-medium mb-1 whitespace-pre-line">{error}</p>
                 {error.includes("Network mismatch") && (
@@ -615,12 +629,27 @@ export function Listings() {
             </span>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {listings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
+              <ListingCard 
+                key={listing.id} 
+                listing={listing} 
+                onClick={() => handleListingClick(listing)}
+              />
             ))}
           </div>
         </div>
+      )}
+
+      {/* Listing Detail Modal */}
+      {selectedListing && (
+        <ListingDetailModal
+          listing={selectedListing}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          account={account}
+          onPurchase={handlePurchase}
+        />
       )}
 
       {!loading && listings.length === 0 && !error && (
@@ -638,10 +667,13 @@ export function Listings() {
   );
 }
 
-function ListingCard({ listing }: { listing: Listing }) {
+function ListingCard({ listing, onClick }: { listing: Listing; onClick: () => void }) {
   return (
-    <div className="group relative bg-card rounded-xl border border-border/60 overflow-hidden hover:shadow-md transition-all duration-300 hover:border-border">
-      <div className="aspect-[4/3] relative overflow-hidden bg-muted">
+    <div 
+      onClick={onClick}
+      className="group relative bg-card rounded-xl border border-border/60 overflow-hidden hover:shadow-md transition-all duration-300 hover:border-border cursor-pointer"
+    >
+      <div className="aspect-4/3 relative overflow-hidden bg-muted">
         {listing.imageUrl ? (
           <img
             src={listing.imageUrl}
