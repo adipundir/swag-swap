@@ -9,7 +9,7 @@ SwagSwap is a Web3 marketplace where hackathon enthusiasts can trade exclusive s
 ## ✨ Features
 
 - 🔐 **Privy Authentication** - Seamless wallet connection with embedded wallets
-- 🛡️ **vlayer Web Proofs** - Server-side cryptographic proofs for hackathon verification
+- 🛡️ **World ID Verification** - Proof of humanity with zero-knowledge proofs
 - 💳 **x402 Payments** - Pay-per-API-call using USDC stablecoins
 - 📦 **Filecoin Storage** - Decentralized image storage via Synapse SDK
 - 🌐 **Cross-Chain Support** - Polygon Amoy & Celo Alfajores testnets
@@ -22,15 +22,12 @@ SwagSwap is a Web3 marketplace where hackathon enthusiasts can trade exclusive s
 
 This project qualifies for:
 
-### **vlayer: Best Server-Side Proving dApp** - $3,000 🏆
-- ✅ Uses vlayer's Web Prover Server (REST API)
-- ✅ POST /prove endpoint for proof generation
-- ✅ POST /verify endpoint for proof verification
-- ✅ TLSNotary (TLSN) protocol for cryptographic proofs
-- ✅ Verifies ETHGlobal hackathon attendance
-- ✅ Zero-knowledge proofs without exposing credentials
-
-See [VLAYER_IMPLEMENTATION.md](./VLAYER_IMPLEMENTATION.md) for detailed documentation.
+### **World ID Integration**
+- ✅ Uses World ID IDKit widget for human verification
+- ✅ Off-chain proof verification
+- ✅ Zero-knowledge proofs for privacy
+- ✅ Sybil-resistant (one verification per human)
+- ✅ Prevents bot spam on marketplace
 
 ### **Filecoin Onchain Cloud Track** - $10,000
 - ✅ Uses Synapse SDK for decentralized storage
@@ -55,7 +52,7 @@ See [VLAYER_IMPLEMENTATION.md](./VLAYER_IMPLEMENTATION.md) for detailed document
 - **Privy SDK** for authentication
 
 ### Blockchain & Web3
-- **vlayer** - Web Prover Server for cryptographic proofs
+- **World ID** - Proof of humanity verification
 - **Privy** - Embedded wallets & authentication
 - **x402** - HTTP payment protocol
 - **Filecoin** - Decentralized storage via Synapse SDK
