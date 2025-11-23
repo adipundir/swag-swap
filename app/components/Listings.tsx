@@ -332,8 +332,18 @@ export function Listings() {
           
           let detailedError = "Payment failed: Unable to process x402 payment.\n\n";
           
-          // Check for signature validation errors
-          if (parsedError?.error === "invalid_exact_evm_payload_signature" || 
+          // Check for insufficient funds error (USDC required, not ETH)
+          if (parsedError?.error === "insufficient_funds") {
+            const maxAmount = parsedError?.accepts?.[0]?.maxAmountRequired || "unknown";
+            detailedError += "⚠️ Insufficient USDC Balance: x402 payments require USDC tokens, not ETH.\n\n";
+            detailedError += "x402 payments on Base Sepolia use USDC (stablecoin), not ETH.\n";
+            detailedError += `Required amount: ${maxAmount} USDC wei\n\n`;
+            detailedError += "To get USDC on Base Sepolia:\n";
+            detailedError += "1. Use a Base Sepolia USDC faucet (search online)\n";
+            detailedError += "2. Bridge USDC from another network to Base Sepolia\n";
+            detailedError += "3. Swap ETH for USDC on Base Sepolia using a DEX like Uniswap\n\n";
+            detailedError += "Note: You have ETH, but x402 payments require USDC tokens.\n";
+          } else if (parsedError?.error === "invalid_exact_evm_payload_signature" || 
               parsedError?.error?.includes("not valid JSON") ||
               parsedError?.error?.includes("Unexpected token")) {
             detailedError += "⚠️ Facilitator Error: The x402 facilitator is having trouble processing the payment.\n\n";
