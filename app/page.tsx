@@ -3,7 +3,7 @@
 import { Listings } from "./components/Listings";
 import { FundWallet } from "./components/FundWallet";
 import { CreateListing } from "./components/CreateListing";
-import { VerifyHackerButtonVouch } from "./components/VerifyHackerButtonVouch";
+import { VerifyHackerButtonWorldID } from "./components/VerifyHackerButtonWorldID";
 import { LandingPage } from "./components/LandingPage";
 import { useState } from "react";
 import { ShoppingBag, PlusCircle, ShieldCheck } from "lucide-react";
@@ -73,7 +73,7 @@ export default function Home() {
             <CreateListing />
           ) : (
             <div className="max-w-2xl mx-auto">
-              <VerifyHackerButtonVouch />
+              <VerifyHackerButtonWorldID />
             </div>
           )}
         </div>
