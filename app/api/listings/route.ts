@@ -58,6 +58,17 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Generate a unique purchase code
+function generatePurchaseCode(): string {
+  // Generate a 6-character alphanumeric code (uppercase)
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Excluding confusing chars like 0, O, I, 1
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
 // POST /api/listings - Create a new listing
 export async function POST(request: NextRequest) {
   try {
@@ -87,10 +98,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Generate unique purchase code
+    const purchaseCode = generatePurchaseCode();
+
     // Insert into Neon database
     const [newListing] = await sql`
-      INSERT INTO listings (title, description, price, image_url, category, seller)
-      VALUES (${title.trim()}, ${description.trim()}, ${price.trim()}, ${body.imageUrl?.trim() || null}, ${category.trim()}, ${seller.toLowerCase()})
+      INSERT INTO listings (title, description, price, image_url, category, seller, purchase_code)
+      VALUES (${title.trim()}, ${description.trim()}, ${price.trim()}, ${body.imageUrl?.trim() || null}, ${category.trim()}, ${seller.toLowerCase()}, ${purchaseCode})
       RETURNING 
         id,
         title,
@@ -99,6 +113,7 @@ export async function POST(request: NextRequest) {
         image_url as "imageUrl",
         category,
         seller,
+        purchase_code as "purchaseCode",
         created_at as "createdAt"
     `;
 
@@ -117,6 +132,7 @@ export async function POST(request: NextRequest) {
       {
         success: true,
         listing: listing,
+        purchaseCode: purchaseCode, // Return code only to seller
         message: "Listing created successfully",
       },
       { status: 201 }

@@ -3,7 +3,7 @@
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useState } from "react";
 import { FileUpload } from "./FileUpload";
-import { Tag, Type, AlignLeft, DollarSign, Upload, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Tag, Type, AlignLeft, DollarSign, Upload, CheckCircle2, AlertCircle, Loader2, Key, Copy } from "lucide-react";
 
 interface ListingFormData {
   title: string;
@@ -27,6 +27,7 @@ export function CreateListing() {
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [purchaseCode, setPurchaseCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [resetFileUpload, setResetFileUpload] = useState(0);
 
@@ -65,6 +66,7 @@ export function CreateListing() {
       console.log("Listing created:", data.listing);
 
       setSuccess(true);
+      setPurchaseCode(data.purchaseCode || null);
       
       // Reset form
       setFormData({
@@ -80,9 +82,6 @@ export function CreateListing() {
 
       // Scroll to top to show success message
       window.scrollTo({ top: 0, behavior: "smooth" });
-
-      // Hide success message after 5 seconds
-      setTimeout(() => setSuccess(false), 5000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create listing");
     } finally {
@@ -263,14 +262,46 @@ export function CreateListing() {
 
           {/* Success Message */}
           {success && (
-            <div className="p-4 bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-500 rounded-lg flex items-start gap-3 text-sm animate-in fade-in-50 slide-in-from-top-2 duration-300">
-              <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="font-medium">Listing created successfully!</p>
-                <p className="text-xs mt-1 text-green-600/80 dark:text-green-500/80">
-                  Your listing has been saved to the database and is now available for others to view.
-                </p>
+            <div className="space-y-4">
+              <div className="p-4 bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-500 rounded-lg flex items-start gap-3 text-sm animate-in fade-in-50 slide-in-from-top-2 duration-300">
+                <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-medium">Listing created successfully!</p>
+                  <p className="text-xs mt-1 text-green-600/80 dark:text-green-500/80">
+                    Your listing has been saved to the database and is now available for others to view.
+                  </p>
+                </div>
               </div>
+
+              {/* Purchase Code Display */}
+              {purchaseCode && (
+                <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Key className="w-4 h-4 text-primary" />
+                    <p className="text-sm font-medium text-foreground">Your Purchase Code</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-background border border-border rounded-md px-4 py-3">
+                      <p className="text-2xl font-mono font-bold text-primary tracking-widest text-center">
+                        {purchaseCode}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(purchaseCode);
+                      }}
+                      className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-4"
+                      title="Copy code"
+                    >
+                      <Copy className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    <strong className="font-medium text-foreground">Important:</strong> Share this code with buyers. 
+                    They will need it to complete the purchase. Save it securely!
+                  </p>
+                </div>
+              )}
             </div>
           )}
 

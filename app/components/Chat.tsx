@@ -148,9 +148,6 @@ export function Chat({ sellerAddress, listingTitle }: ChatProps) {
             <Send className="w-4 h-4" />
           </button>
         </div>
-        <p className="text-xs text-muted-foreground mt-2 text-center">
-          Chat is for demonstration purposes only
-        </p>
       </form>
     </div>
   );
