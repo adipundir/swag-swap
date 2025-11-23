@@ -2,9 +2,10 @@
 
 // PRIVY with x402 support
 import { usePrivy, useWallets, useX402Fetch } from "@privy-io/react-auth";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Search, AlertCircle, Loader2, ShoppingBag, ArrowRight, RefreshCw } from "lucide-react";
 import { ListingDetailModal } from "./ListingDetailModal";
+import { useVerification } from "../contexts/VerificationContext";
 
 export interface Listing {
   id: string;
@@ -20,6 +21,7 @@ export function Listings() {
   const { authenticated } = usePrivy();
   const { wallets } = useWallets();
   const { wrapFetchWithPayment } = useX402Fetch();
+  const { isVerified, checkingVerification, checkVerificationStatus } = useVerification();
   
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -38,8 +40,6 @@ export function Listings() {
   
   const walletAddress = activeWallet?.address;
   const chainId = activeWallet?.chainId;
-
-  // No useEffect needed - Privy handles wallet connection
 
   const handleSwitchToBaseSepolia = async () => {
     if (!walletAddress) {
@@ -70,6 +70,12 @@ export function Listings() {
 
     if (!walletAddress) {
       setError("No wallet connected. Please login first.");
+      return;
+    }
+
+    // Check verification status before allowing fetch
+    if (!isVerified) {
+      setError("❌ Verification Required: You must verify as a human using World ID in the navbar before you can fetch listings.");
       return;
     }
 
@@ -278,11 +284,17 @@ export function Listings() {
 
           <button
             onClick={handleFetchListings}
-            disabled={loading || !apiUrl}
+            disabled={loading || !apiUrl || !isVerified || checkingVerification}
             className="sm:col-span-2 lg:col-span-1 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 sm:px-6"
+            title={!isVerified && !checkingVerification ? "You must verify as human to fetch listings" : ""}
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
+            ) : checkingVerification ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                Checking...
+              </>
             ) : (
               <>
                 Fetch
@@ -295,6 +307,28 @@ export function Listings() {
         <div className="mt-2 text-[10px] text-muted-foreground text-right">
           Payment amount: ~1 USDC per request
         </div>
+
+        {!isVerified && !checkingVerification && authenticated && (
+          <div className="mt-4 p-3 sm:p-4 bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-500 rounded-lg">
+            <div className="flex items-start gap-3 text-sm">
+              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="font-medium mb-1">Verification Required</p>
+                <p className="text-xs opacity-90 mb-2">
+                  You must verify as a human using World ID in the navbar to fetch listings.
+                </p>
+                <button
+                  onClick={checkVerificationStatus}
+                  disabled={checkingVerification}
+                  className="text-xs underline hover:no-underline inline-flex items-center gap-1"
+                >
+                  <RefreshCw className={`w-3 h-3 ${checkingVerification ? 'animate-spin' : ''}`} />
+                  {checkingVerification ? 'Checking...' : 'Check verification status'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">

@@ -235,7 +235,7 @@ export function VerifyHackerButtonWorldID() {
         <IDKitWidget
           app_id={process.env.NEXT_PUBLIC_WORLD_APP_ID as `app_${string}`}
           action="humanhood"
-          verification_level={VerificationLevel.Orb}
+          verification_level={VerificationLevel.Device}
           handleVerify={handleVerifySuccess}
           onSuccess={() => {
             console.log("World ID widget success");

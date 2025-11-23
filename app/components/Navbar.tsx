@@ -5,13 +5,13 @@ import { Copy, LogOut, Wallet, ShieldCheck, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { IDKitWidget, ISuccessResult, VerificationLevel } from "@worldcoin/idkit";
 import confetti from "canvas-confetti";
+import { useVerification } from "../contexts/VerificationContext";
 
 export function Navbar() {
   const { ready, authenticated, login, logout } = usePrivy();
   const { wallets } = useWallets();
-  const [isVerified, setIsVerified] = useState(false);
+  const { isVerified, checkVerificationStatus, setVerified } = useVerification();
   const [isVerifying, setIsVerifying] = useState(false);
-  const [checkingStatus, setCheckingStatus] = useState(false);
 
   const walletAddress = wallets[0]?.address || "";
   const truncatedAddress = walletAddress
@@ -26,29 +26,6 @@ export function Navbar() {
       console.log("   Value:", process.env.NEXT_PUBLIC_WORLD_APP_ID);
     }
   }, []);
-
-  // Check verification status
-  useEffect(() => {
-    if (walletAddress && authenticated) {
-      checkVerificationStatus();
-    }
-  }, [walletAddress, authenticated]);
-
-  const checkVerificationStatus = async () => {
-    if (!walletAddress) return;
-    setCheckingStatus(true);
-    try {
-      const response = await fetch(`/api/verify/hacker/worldid?address=${walletAddress}`);
-      const data = await response.json();
-      if (data.success && data.isVerified) {
-        setIsVerified(true);
-      }
-    } catch (err) {
-      console.error("Error checking verification:", err);
-    } finally {
-      setCheckingStatus(false);
-    }
-  };
 
   const triggerConfetti = () => {
     confetti({
@@ -98,8 +75,10 @@ export function Navbar() {
       
       if (data.success) {
         console.log("✅ CLIENT: Verification successful!");
-        setIsVerified(true);
+        setVerified(true); // Update context - this will update all components!
         triggerConfetti();
+        // Re-check verification status to ensure it's persisted
+        await checkVerificationStatus();
       } else {
         console.error("❌ CLIENT: Verification failed:", data.error);
       }
@@ -132,12 +111,12 @@ export function Navbar() {
           ) : authenticated ? (
             <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
               {/* World ID Verification Button */}
-              {checkingStatus ? null : !isVerified ? (
+              {!isVerified ? (
                 process.env.NEXT_PUBLIC_WORLD_APP_ID ? (
                   <IDKitWidget
                     app_id={process.env.NEXT_PUBLIC_WORLD_APP_ID as `app_${string}`}
                     action="humanhood"
-                    verification_level={VerificationLevel.Orb}
+                    verification_level={VerificationLevel.Device}
                     handleVerify={handleVerify}
                     onSuccess={() => console.log("World ID success")}
                   >

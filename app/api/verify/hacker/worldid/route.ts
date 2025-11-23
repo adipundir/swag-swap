@@ -48,8 +48,7 @@ async function verifyWorldIDProof(payload: WorldIDProofPayload): Promise<{
     console.log("   Verification level:", payload.verification_level);
 
     const app_id = process.env.WORLD_APP_ID;
-    // Action must match what's configured in World ID Developer Portal
-    const action = "humanhood";
+    const action = process.env.ACTION_ID || "humanhood";
 
     console.log("🔐 Environment check:");
     console.log("   app_id:", app_id ? `${app_id.slice(0, 15)}...` : "NOT SET");
@@ -59,11 +58,11 @@ async function verifyWorldIDProof(payload: WorldIDProofPayload): Promise<{
       console.error("❌ app_id is not configured!");
       return {
         success: false,
-        error: "World ID app_id not configured. Please set NEXT_PUBLIC_WORLD_APP_ID=app_76566af9071b7531534fa11af3e66e38 in your .env.local file.",
+        error: "World ID app_id not configured. Please set WORLD_APP_ID in your .env.local file.",
       };
     }
 
-    // Verify the proof with World ID Developer Portal API
+    // Build the verification payload
     const verifyPayload = {
       merkle_root: payload.merkle_root,
       nullifier_hash: payload.nullifier_hash,
@@ -73,11 +72,12 @@ async function verifyWorldIDProof(payload: WorldIDProofPayload): Promise<{
     };
 
     console.log("📤 Sending to World ID API:");
-    console.log("   URL:", `https://developer.worldcoin.org/api/v1/verify/${app_id}`);
+    console.log(`   URL: https://developer.worldcoin.org/api/v2/verify/${app_id}`);
     console.log("   Payload:", JSON.stringify(verifyPayload, null, 2));
 
+    // Call World ID verification API
     const response = await fetch(
-      `https://developer.worldcoin.org/api/v1/verify/${app_id}`,
+      `https://developer.worldcoin.org/api/v2/verify/${app_id}`,
       {
         method: "POST",
         headers: {
@@ -91,21 +91,32 @@ async function verifyWorldIDProof(payload: WorldIDProofPayload): Promise<{
     console.log("   Response OK:", response.ok);
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ detail: "Verification failed" }));
+      const errorData = await response.json().catch(() => ({ 
+        code: "verification_error",
+        detail: "Verification failed" 
+      }));
+      
       console.error("\n❌ SERVER: World ID API returned error!");
       console.error("   Status:", response.status);
       console.error("   Error data:", JSON.stringify(errorData, null, 2));
+      console.error("\n💡 DEBUGGING TIPS:");
+      console.error("   1. Check World ID Developer Portal: https://developer.worldcoin.org/");
+      console.error("   2. Verify action is configured in your app");
+      console.error("   3. Make sure verification level matches (device vs orb)");
+      console.error("   4. User may have already verified with this World ID");
       console.error("========================================\n");
+      
       return {
         success: false,
-        error: errorData.detail || errorData.error || `Verification failed with status ${response.status}`,
+        error: errorData.detail || errorData.code || `Verification failed with status ${response.status}`,
       };
     }
 
     const data = await response.json();
     console.log("📥 SERVER: World ID API response data:", JSON.stringify(data, null, 2));
 
-    if (data.success === true) {
+    // Check if verification was successful
+    if (data.success === true || response.status === 200) {
       console.log("✅ SERVER: World ID proof verified successfully!");
       console.log("========================================\n");
       return { success: true };
@@ -119,7 +130,7 @@ async function verifyWorldIDProof(payload: WorldIDProofPayload): Promise<{
       };
     }
   } catch (error) {
-    console.error("Error verifying World ID proof:", error);
+    console.error("❌ Error verifying World ID proof:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Unknown verification error",
@@ -209,6 +220,8 @@ export async function POST(request: NextRequest) {
     console.log(`✅ User ${body.walletAddress} verified via World ID`);
     console.log(`   Verification level: ${body.verification_level}`);
     console.log(`   Method: Off-chain World ID proof`);
+    console.log(`   Stored in Map with key: ${body.walletAddress.toLowerCase()}`);
+    console.log(`   Total verified users: ${verifiedUsers.size}`);
 
     // Return success
     return NextResponse.json(
@@ -243,6 +256,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const address = searchParams.get("address");
 
+    console.log("🔍 GET: Checking verification for address:", address);
+    console.log("   Total verified users in Map:", verifiedUsers.size);
+    console.log("   All verified addresses:", Array.from(verifiedUsers.keys()));
+
     if (!address) {
       return NextResponse.json(
         {
@@ -253,7 +270,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const verification = verifiedUsers.get(address.toLowerCase());
+    const normalizedAddress = address.toLowerCase();
+    console.log("   Normalized address:", normalizedAddress);
+    
+    const verification = verifiedUsers.get(normalizedAddress);
+    console.log("   Found verification:", verification ? "YES" : "NO");
 
     if (!verification) {
       return NextResponse.json(

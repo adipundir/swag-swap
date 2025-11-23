@@ -2,6 +2,7 @@
 
 import { PrivyProvider } from "@privy-io/react-auth";
 import { baseSepolia } from "viem/chains";
+import { VerificationProvider } from "../contexts/VerificationContext";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -18,7 +19,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         supportedChains: [baseSepolia],
       }}
     >
-      {children}
+      <VerificationProvider>
+        {children}
+      </VerificationProvider>
     </PrivyProvider>
   );
 }
