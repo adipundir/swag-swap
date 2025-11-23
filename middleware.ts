@@ -7,15 +7,20 @@ if (!process.env.RECEIVER_WALLET_ADDRESS) {
 }
 
 // Create the x402 payment middleware
+// Using official CDP x402 facilitator for testnet
 const x402Middleware = paymentMiddleware(
-  // Your wallet address where you receive USDC payments
+  // Your wallet address where you receive payments
   process.env.RECEIVER_WALLET_ADDRESS as `0x${string}`,
   {
     // Protected API route configuration
     "/api/listings": {
-      price: "$0.0001", // Price in USD (equivalent to ~0.0001 USDC)
+      price: "$0.0001", // Price in USD (paid in USDC on Base Sepolia)
       network: "base-sepolia", // Base Sepolia testnet
     },
+  },
+  {
+    // Facilitator configuration - use official CDP facilitator for testnet
+    url: "https://x402.org/facilitator", // Official x402 facilitator for testnet (Base Sepolia)
   }
 );
 

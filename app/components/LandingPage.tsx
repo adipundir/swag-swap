@@ -178,7 +178,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
                   icon={ShoppingBag}
                   title="ETH Denver Hoodie"
                   subtitle="Limited Edition 2024"
-                  price="50 USDC"
+                  price="0.05 ETH"
                   tag="ETH Denver"
                   delay={0.5}
                 />
@@ -186,7 +186,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
                   icon={Shield}
                   title="Chainlink Cap"
                   subtitle="Official Swag"
-                  price="15 USDC"
+                  price="0.015 ETH"
                   tag="Chainlink"
                   delay={0.6}
                   className="mt-8"
@@ -195,7 +195,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
                   icon={Zap}
                   title="Base T-Shirt"
                   subtitle="Brand New"
-                  price="20 USDC"
+                  price="0.02 ETH"
                   tag="Base"
                   delay={0.7}
                 />
@@ -203,7 +203,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
                   icon={Globe}
                   title="Sticker Pack"
                   subtitle="Complete Set"
-                  price="5 USDC"
+                  price="0.005 ETH"
                   tag="Polygon"
                   delay={0.8}
                   className="mt-8"

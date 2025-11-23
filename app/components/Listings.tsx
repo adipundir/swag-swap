@@ -1,9 +1,15 @@
 "use client";
 
-import { usePrivy, useWallets, useX402Fetch } from "@privy-io/react-auth";
-import { useState } from "react";
+// PRIVY CODE - COMMENTED OUT FOR CDP WALLET TESTING
+// import { usePrivy, useWallets, useX402Fetch } from "@privy-io/react-auth";
+
+// CDP WALLET - Using Coinbase Wallet SDK
+import { CoinbaseWalletSDK } from "@coinbase/wallet-sdk";
+// OFFICIAL CDP x402 - Using x402-fetch package
+import { wrapFetchWithPayment } from "x402-fetch";
+import { useState, useEffect } from "react";
 import { Search, DollarSign, AlertCircle, Loader2, ShoppingBag, ArrowRight, RefreshCw } from "lucide-react";
-import { createWalletClient, custom, Chain } from "viem";
+import { createWalletClient, custom, Chain, createPublicClient, http, formatEther, type Address } from "viem";
 import { baseSepolia } from "viem/chains";
 
 export interface Listing {
@@ -17,9 +23,18 @@ export interface Listing {
 }
 
 export function Listings() {
-  const { authenticated } = usePrivy();
-  const { wallets } = useWallets();
-  const { wrapFetchWithPayment } = useX402Fetch();
+  // PRIVY CODE - COMMENTED OUT FOR CDP WALLET TESTING
+  // const { authenticated } = usePrivy();
+  // const { wallets } = useWallets();
+  // const { wrapFetchWithPayment } = useX402Fetch();
+  
+  // CDP WALLET STATE
+  const [account, setAccount] = useState<string | null>(null);
+  const [chainId, setChainId] = useState<number | null>(null);
+  const [balance, setBalance] = useState<string | null>(null);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [coinbaseWallet, setCoinbaseWallet] = useState<CoinbaseWalletSDK | null>(null);
+  const [provider, setProvider] = useState<any>(null);
   
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -27,12 +42,128 @@ export function Listings() {
   const [apiUrl, setApiUrl] = useState<string>(
     process.env.NEXT_PUBLIC_LISTINGS_API_URL || "/api/listings"
   );
-  const [maxPayment, setMaxPayment] = useState<string>("1000000"); // 1 USDC default
+  const [maxPayment, setMaxPayment] = useState<string>("100000000000000"); // 0.0001 ETH default (in wei)
   const [switchingNetwork, setSwitchingNetwork] = useState(false);
 
+  // Initialize Coinbase Wallet SDK
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const sdk = new CoinbaseWalletSDK({
+        appName: "SwagSwap",
+        appLogoUrl: typeof window !== "undefined" ? window.location.origin + "/favicon.ico" : undefined,
+      });
+      setCoinbaseWallet(sdk);
+      const cbProvider = sdk.makeWeb3Provider();
+      setProvider(cbProvider);
+    }
+  }, []);
+
+  // Check if already connected
+  useEffect(() => {
+    if (!provider) return;
+
+    const checkConnection = async () => {
+      try {
+        const accounts = await provider.request({ method: "eth_accounts" });
+        if (accounts && accounts.length > 0) {
+          setAccount(accounts[0]);
+          setAuthenticated(true);
+          await updateChainId();
+          await updateBalance(accounts[0]);
+        }
+      } catch (err) {
+        console.error("Error checking connection:", err);
+      }
+    };
+
+    checkConnection();
+
+    // Listen for account changes
+    provider.on?.("accountsChanged", (accounts: string[]) => {
+      if (accounts && accounts.length > 0) {
+        setAccount(accounts[0]);
+        setAuthenticated(true);
+        updateBalance(accounts[0]);
+      } else {
+        setAccount(null);
+        setAuthenticated(false);
+      }
+    });
+
+    // Listen for chain changes
+    provider.on?.("chainChanged", () => {
+      updateChainId();
+      if (account) {
+        updateBalance(account);
+      }
+    });
+
+    return () => {
+      provider.removeAllListeners?.("accountsChanged");
+      provider.removeAllListeners?.("chainChanged");
+    };
+  }, [provider, account]);
+
+  // Connect to Coinbase Wallet
+  const connectWallet = async () => {
+    if (!provider) {
+      setError("Coinbase Wallet not available. Please install Coinbase Wallet extension.");
+      return;
+    }
+
+    try {
+      const accounts = await provider.request({ method: "eth_requestAccounts" });
+      if (accounts && accounts.length > 0) {
+        setAccount(accounts[0]);
+        setAuthenticated(true);
+        await updateChainId();
+        await updateBalance(accounts[0]);
+      }
+    } catch (err) {
+      console.error("Error connecting to Coinbase Wallet:", err);
+      setError("Failed to connect to Coinbase Wallet. Please approve the connection request.");
+    }
+  };
+
+  // Update chain ID
+  const updateChainId = async () => {
+    if (!provider) return;
+
+    try {
+      const chainIdHex = await provider.request({ method: "eth_chainId" });
+      const chainId = parseInt(chainIdHex as string, 16);
+      setChainId(chainId);
+    } catch (err) {
+      console.error("Error getting chain ID:", err);
+    }
+  };
+
+  // Update balance
+  const updateBalance = async (address: string) => {
+    try {
+      const publicClient = createPublicClient({
+        chain: baseSepolia,
+        transport: http("https://sepolia.base.org"),
+      });
+      const balanceWei = await publicClient.getBalance({
+        address: address as `0x${string}`,
+      });
+      setBalance(formatEther(balanceWei));
+    } catch (err) {
+      console.error("Error fetching balance:", err);
+    }
+  };
+
   const handleSwitchToBaseSepolia = async () => {
-    if (!wallets[0]?.address) {
-      setError("No wallet connected. Please login first.");
+    // PRIVY CODE - COMMENTED OUT
+    // if (!wallets[0]?.address) {
+    //   setError("No wallet connected. Please login first.");
+    //   return;
+    // }
+
+    // CDP WALLET CODE
+    if (!account || !provider) {
+      setError("No wallet connected. Please connect Coinbase Wallet first.");
       return;
     }
 
@@ -40,8 +171,6 @@ export function Listings() {
     setError(null);
 
     try {
-      const wallet = wallets[0];
-      
       // Base Sepolia chain configuration
       const baseSepoliaChain = {
         chainId: "0x14A34", // 84532 in hex (0x14A34)
@@ -55,28 +184,9 @@ export function Listings() {
         blockExplorerUrls: ["https://sepolia-explorer.base.org"],
       };
 
-      // Try to get provider from wallet or window.ethereum
-      let provider: any = null;
-      
-      if ((wallet as any).provider) {
-        provider = (wallet as any).provider;
-      } else if (typeof window !== "undefined" && (window as any).ethereum) {
-        provider = (window as any).ethereum;
-      }
-
+      // CDP WALLET CODE - provider is already set from state
       if (!provider) {
-        // For Privy embedded wallets, try using viem with the wallet's client
-        try {
-          const walletClient = createWalletClient({
-            chain: baseSepolia,
-            transport: custom((wallet as any).provider || (window as any).ethereum),
-          });
-          await walletClient.switchChain({ id: baseSepolia.id });
-          setSwitchingNetwork(false);
-          return;
-        } catch (viemError) {
-          throw new Error("Unable to access wallet provider. Please switch networks manually in your wallet.");
-        }
+        throw new Error("Coinbase Wallet provider not available. Please connect your wallet first.");
       }
 
       // Try to switch chain first
@@ -85,6 +195,8 @@ export function Listings() {
           method: "wallet_switchEthereumChain",
           params: [{ chainId: baseSepoliaChain.chainId }],
         });
+        await updateChainId();
+        setError(null);
       } catch (switchError: any) {
         // If chain doesn't exist (error code 4902), add it
         if (switchError.code === 4902 || switchError.code === -32603) {
@@ -92,6 +204,8 @@ export function Listings() {
             method: "wallet_addEthereumChain",
             params: [baseSepoliaChain],
           });
+          await updateChainId();
+          setError(null);
         } else {
           throw switchError;
         }
@@ -105,14 +219,51 @@ export function Listings() {
     }
   };
 
+  // Create x402-enabled fetch using official x402-fetch package
+  const getX402Fetch = () => {
+    if (!provider || !account) {
+      throw new Error("Coinbase Wallet not connected");
+    }
+
+    // Create viem wallet client from Coinbase Wallet provider
+    // x402-fetch works with viem wallet clients that implement the Signer interface
+    // We need to pass the account address and use custom transport with the provider
+    const walletClient = createWalletClient({
+      account: account as Address,
+      chain: baseSepolia,
+      transport: custom(provider),
+    });
+
+    // Wrap fetch with x402 payment handling using official CDP x402-fetch package
+    // This automatically handles:
+    // 1. Making initial request
+    // 2. Detecting 402 Payment Required responses
+    // 3. Signing payment authorization with the wallet
+    // 4. Retrying request with X-PAYMENT header
+    const fetchWithPayment = wrapFetchWithPayment(
+      fetch,
+      walletClient as any, // viem wallet client implements x402 Signer interface
+      BigInt(maxPayment) // maxValue in wei (0.0001 ETH = 100000000000000 wei)
+    );
+
+    return fetchWithPayment;
+  };
+
   const handleFetchListings = async () => {
     if (!apiUrl) {
       alert("Please enter an API URL");
       return;
     }
 
-    if (!wallets[0]?.address) {
-      setError("No wallet connected. Please login first.");
+    // PRIVY CODE - COMMENTED OUT
+    // if (!wallets[0]?.address) {
+    //   setError("No wallet connected. Please login first.");
+    //   return;
+    // }
+
+    // CDP WALLET CODE
+    if (!account || !provider) {
+      setError("No wallet connected. Please connect Coinbase Wallet first.");
       return;
     }
 
@@ -120,42 +271,142 @@ export function Listings() {
     setError(null);
 
     try {
-      // Wrap fetch with x402 payment support
-      const fetchWithPayment = wrapFetchWithPayment({
-        walletAddress: wallets[0].address,
-        fetch,
-        maxValue: maxPayment ? BigInt(maxPayment) : undefined,
+      // Verify network before attempting payment
+      // Base Sepolia chain ID is 84532
+      if (chainId !== null && chainId !== 84532) {
+        throw new Error(
+          `Network mismatch: Your wallet is on chain ID ${chainId}, but Base Sepolia (chain ID 84532) is required for x402 payments. Please use the "Switch Network" button above.`
+        );
+      }
+
+      // CDP WALLET CODE - Using official x402-fetch package
+      console.log("Making request to:", apiUrl);
+      console.log("Wallet address:", account);
+      console.log("Current chain ID:", chainId);
+      console.log("Max payment (wei):", maxPayment);
+      
+      // Get x402-enabled fetch function
+      const fetchWithPayment = getX402Fetch();
+      
+      // Make request - x402-fetch handles 402 responses automatically
+      const response = await fetchWithPayment(apiUrl, {
+        method: "GET",
+      });
+      
+      console.log("Response received:", {
+        status: response.status,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries())
       });
 
-      // Automatically handles 402 Payment Required
-      const response = await fetchWithPayment(apiUrl);
-
       if (!response.ok) {
-        // Check if it's still a payment required error
+        // If still 402 after payment attempt, payment failed
         if (response.status === 402) {
-          throw new Error("Payment failed: Unable to process x402 payment. Please ensure you have USDC balance on Base Sepolia and try again.");
+          const errorText = await response.text().catch(() => "");
+          console.error("402 Payment Required - Payment processing failed");
+          console.error("Response text:", errorText.substring(0, 500));
+          console.error("Debug info:", {
+            walletAddress: account,
+            chainId: chainId,
+            maxPayment,
+            responseHeaders: Object.fromEntries(response.headers.entries())
+          });
+          
+          // Parse error response to check for specific signature errors
+          let parsedError: any = null;
+          try {
+            parsedError = JSON.parse(errorText);
+            console.error("Parsed error:", parsedError);
+          } catch (e) {
+            // Not JSON, try to extract JSON if it's wrapped
+            const jsonMatch = errorText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              try {
+                parsedError = JSON.parse(jsonMatch[0]);
+                console.error("Parsed error (extracted):", parsedError);
+              } catch (e2) {
+                console.error("Could not parse error response as JSON");
+              }
+            }
+          }
+          
+          let detailedError = "Payment failed: Unable to process x402 payment.\n\n";
+          
+          // Check for signature validation errors
+          if (parsedError?.error === "invalid_exact_evm_payload_signature" || 
+              parsedError?.error?.includes("not valid JSON") ||
+              parsedError?.error?.includes("Unexpected token")) {
+            detailedError += "⚠️ Facilitator Error: The x402 facilitator is having trouble processing the payment.\n\n";
+            detailedError += "Error details: " + (parsedError?.error || "Unknown error") + "\n\n";
+            detailedError += "This appears to be an issue with the x402 facilitator service trying to parse the payment signature.\n";
+            detailedError += "Possible causes:\n";
+            detailedError += "• The facilitator may have a bug parsing signatures\n";
+            detailedError += "• Network connectivity issues with the facilitator service\n";
+            detailedError += "• The x402-next middleware version may have compatibility issues\n\n";
+            detailedError += "Try:\n";
+            detailedError += "1. Refresh the page and try again\n";
+            detailedError += "2. Check your network connection\n";
+            detailedError += "3. Wait a few moments and retry (facilitator may be temporarily unavailable)\n";
+            detailedError += "4. Check the browser console for more detailed error information\n\n";
+            detailedError += "Note: This is likely a facilitator service issue, not a problem with your wallet or signature.\n";
+          } else {
+            // Generic error handling
+            if (chainId !== 84532) {
+              detailedError += "⚠️ Network Issue: Your wallet is not on Base Sepolia (chain ID 84532).\n";
+            }
+            detailedError += "\nPossible causes:\n";
+            detailedError += "• Network not set to Base Sepolia (chain ID 84532)\n";
+            detailedError += "• Insufficient USDC balance (x402 payments require USDC, not ETH)\n";
+            detailedError += "• Payment transaction was rejected or failed\n";
+            detailedError += "• x402 facilitator service issue\n\n";
+            detailedError += "Try:\n";
+            detailedError += "1. Use the 'Switch Network' button above to switch to Base Sepolia\n";
+            detailedError += "2. Ensure you have USDC tokens on Base Sepolia (not just ETH)\n";
+            detailedError += "3. Get USDC from a Base Sepolia faucet or swap ETH for USDC\n";
+            detailedError += "4. Approve the payment transaction when prompted\n";
+            detailedError += "5. Try fetching listings again";
+          }
+          
+          throw new Error(detailedError);
         }
+        const errorText = await response.text().catch(() => "");
+        console.error("API Error:", response.status, errorText);
         throw new Error(`Failed to fetch listings: ${response.statusText} (${response.status})`);
       }
 
       const data = await response.json();
-      const listingsData = Array.isArray(data) ? data : data.listings || [];
+      console.log("API Response data:", data);
+      
+      // Handle response format: { success: true, listings: [...], count: ... }
+      let listingsData: Listing[] = [];
+      if (Array.isArray(data)) {
+        listingsData = data;
+      } else if (data.listings && Array.isArray(data.listings)) {
+        listingsData = data.listings;
+      } else if (data.success && data.listings && Array.isArray(data.listings)) {
+        listingsData = data.listings;
+      }
+      
+      console.log("Parsed listings count:", listingsData.length);
       setListings(listingsData);
+      
+      if (listingsData.length === 0) {
+        console.warn("No listings found in response");
+      }
     } catch (err) {
       let errorMessage =
         err instanceof Error ? err.message : "Unknown error occurred";
       
       // Improve error messages for common issues
-      if (errorMessage.includes("chainId")) {
-        if (errorMessage.includes("84532")) {
-          errorMessage = "Network mismatch: Please switch your wallet to Base Sepolia testnet. The app requires Base Sepolia (chainId 84532) for x402 payments.";
-        } else {
-          errorMessage = `Network mismatch: ${errorMessage}. Please ensure your wallet is connected to Base Sepolia testnet.`;
-        }
+      if (errorMessage.includes("chainId") || errorMessage.includes("Network mismatch")) {
+        // Error message already includes network details
       } else if (errorMessage.includes("Payment Required") || errorMessage.includes("Payment failed")) {
-        errorMessage = `${errorMessage}\n\nPossible causes:\n• Insufficient USDC balance (need at least $0.0001 USDC)\n• Payment transaction was rejected\n• Network not set to Base Sepolia\n\nTry funding your wallet with USDC first.`;
+        // Error message already includes detailed troubleshooting
       } else if (errorMessage.includes("insufficient") || errorMessage.includes("balance")) {
-        errorMessage = `Insufficient balance: ${errorMessage}\n\nPlease fund your wallet with USDC on Base Sepolia testnet. You need at least $0.0001 USDC to fetch listings.`;
+        errorMessage = `Insufficient balance: ${errorMessage}\n\nPlease fund your wallet with ETH on Base Sepolia testnet. You need at least 0.0001 ETH to fetch listings.`;
+      } else {
+        // Add network check suggestion for other errors
+        errorMessage += "\n\nTip: Make sure your wallet is connected to Base Sepolia testnet (chain ID 84532).";
       }
       
       setError(errorMessage);
@@ -171,10 +422,21 @@ export function Listings() {
         <div className="bg-background p-3 rounded-full shadow-sm mb-4">
           <ShoppingBag className="w-6 h-6 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-medium mb-2">Login Required</h3>
-        <p className="text-muted-foreground max-w-sm">
-          Please connect your wallet to view and purchase exclusive listings.
+        <h3 className="text-lg font-medium mb-2">Connect Wallet</h3>
+        <p className="text-muted-foreground max-w-sm mb-4">
+          Please connect your Coinbase Wallet to view and purchase exclusive listings.
         </p>
+        <button
+          onClick={connectWallet}
+          className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6"
+        >
+          Connect Coinbase Wallet
+        </button>
+        {!coinbaseWallet && (
+          <p className="text-xs text-destructive mt-2">
+            Coinbase Wallet not available. Please install the Coinbase Wallet extension.
+          </p>
+        )}
       </div>
     );
   }
@@ -187,7 +449,7 @@ export function Listings() {
           <div className="p-2 bg-primary/10 rounded-lg text-primary">
             <Search className="w-5 h-5" />
           </div>
-          <div>
+          <div className="flex-1">
             <h2 className="text-lg font-semibold tracking-tight">
               Fetch Listings
             </h2>
@@ -219,6 +481,19 @@ export function Listings() {
           </div>
         </div>
         
+        {/* CDP Wallet Info */}
+        <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+          <div className="flex items-start gap-2 text-xs text-blue-600 dark:text-blue-500">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium mb-1">Using CDP Wallet (Coinbase Wallet)</p>
+              <p className="text-muted-foreground">
+                Currently testing with Coinbase Wallet. Privy code is commented out and can be restored later.
+              </p>
+            </div>
+          </div>
+        </div>
+        
         <div className="grid md:grid-cols-[2fr_1fr_auto] gap-4 items-end">
           <div className="space-y-2">
             <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -235,18 +510,18 @@ export function Listings() {
 
           <div className="space-y-2">
             <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Max Payment
+              Max Payment (Wei)
             </label>
             <div className="relative">
               <input
                 type="text"
                 value={maxPayment}
                 onChange={(e) => setMaxPayment(e.target.value)}
-                placeholder="1000000"
+                placeholder="100000000000000"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-16"
               />
               <span className="absolute right-3 top-3 text-xs text-muted-foreground pointer-events-none">
-                Units
+                Wei
               </span>
             </div>
           </div>
@@ -268,7 +543,7 @@ export function Listings() {
         </div>
         
         <div className="mt-2 text-[10px] text-muted-foreground text-right">
-          1,000,000 units = 1 USDC
+          Payment amount: ~0.0001 ETH ($0.0001 USD)
         </div>
 
         {error && (
@@ -305,8 +580,8 @@ export function Listings() {
                     </p>
                     <ol className="text-xs text-destructive/80 space-y-1 list-decimal list-inside">
                       <li>Ensure your wallet is on Base Sepolia testnet</li>
-                      <li>Fund your wallet with USDC (at least $0.0001 USDC)</li>
-                      <li>Use the "Fund Wallet" button above to add testnet USDC</li>
+                      <li>Fund your wallet with ETH (at least 0.0001 ETH)</li>
+                      <li>Use the "Fund Wallet" button above or a Base Sepolia faucet to get testnet ETH</li>
                       <li>Approve the payment transaction when prompted</li>
                       <li>Try fetching listings again</li>
                     </ol>
