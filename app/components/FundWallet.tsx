@@ -27,7 +27,13 @@ export function FundWallet() {
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to fund wallet";
-      setError(errorMessage);
+      
+      // Check if it's the "not enabled" error
+      if (errorMessage.includes("not enabled") || errorMessage.includes("Wallet funding")) {
+        setError("Wallet funding is not enabled in Privy. Please use a Base Sepolia faucet to get testnet USDC.");
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -57,9 +63,31 @@ export function FundWallet() {
               </p>
               
               {error && (
-                <div className="flex items-center gap-2 text-sm text-destructive mt-2">
-                  <AlertCircle className="w-4 h-4" />
-                  {error}
+                <div className="mt-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <div className="flex items-start gap-2 text-sm text-destructive">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="font-medium mb-1">{error}</p>
+                      {error.includes("not enabled") && (
+                        <div className="mt-2 pt-2 border-t border-destructive/20">
+                          <p className="text-xs text-destructive/80 mb-2">
+                            <strong>Alternative ways to get testnet USDC:</strong>
+                          </p>
+                          <ol className="text-xs text-destructive/80 space-y-1 list-decimal list-inside">
+                            <li>Use a Base Sepolia faucet:
+                              <ul className="list-disc list-inside ml-4 mt-1 space-y-0.5">
+                                <li>Base Sepolia Faucet: <a href="https://www.coinbase.com/faucets/base-ethereum-goerli-faucet" target="_blank" rel="noopener noreferrer" className="underline">Coinbase Base Sepolia Faucet</a></li>
+                                <li>Or search for "Base Sepolia faucet" online</li>
+                              </ul>
+                            </li>
+                            <li>Request testnet USDC from the faucet to your wallet address: <code className="bg-destructive/10 px-1 rounded">{wallets[0]?.address}</code></li>
+                            <li>Ensure you're on Base Sepolia network (chainId: 84532)</li>
+                            <li>You need at least $0.0001 USDC to fetch listings</li>
+                          </ol>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
               {success && (

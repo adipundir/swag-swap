@@ -2,7 +2,9 @@
 
 import { usePrivy, useWallets, useX402Fetch } from "@privy-io/react-auth";
 import { useState } from "react";
-import { Search, DollarSign, AlertCircle, Loader2, ShoppingBag, ArrowRight } from "lucide-react";
+import { Search, DollarSign, AlertCircle, Loader2, ShoppingBag, ArrowRight, RefreshCw } from "lucide-react";
+import { createWalletClient, custom, Chain } from "viem";
+import { baseSepolia } from "viem/chains";
 
 export interface Listing {
   id: string;
@@ -26,6 +28,82 @@ export function Listings() {
     process.env.NEXT_PUBLIC_LISTINGS_API_URL || "/api/listings"
   );
   const [maxPayment, setMaxPayment] = useState<string>("1000000"); // 1 USDC default
+  const [switchingNetwork, setSwitchingNetwork] = useState(false);
+
+  const handleSwitchToBaseSepolia = async () => {
+    if (!wallets[0]?.address) {
+      setError("No wallet connected. Please login first.");
+      return;
+    }
+
+    setSwitchingNetwork(true);
+    setError(null);
+
+    try {
+      const wallet = wallets[0];
+      
+      // Base Sepolia chain configuration
+      const baseSepoliaChain = {
+        chainId: "0x14A34", // 84532 in hex (0x14A34)
+        chainName: "Base Sepolia",
+        nativeCurrency: {
+          name: "ETH",
+          symbol: "ETH",
+          decimals: 18,
+        },
+        rpcUrls: ["https://sepolia.base.org"],
+        blockExplorerUrls: ["https://sepolia-explorer.base.org"],
+      };
+
+      // Try to get provider from wallet or window.ethereum
+      let provider: any = null;
+      
+      if (wallet.provider) {
+        provider = wallet.provider;
+      } else if (typeof window !== "undefined" && (window as any).ethereum) {
+        provider = (window as any).ethereum;
+      }
+
+      if (!provider) {
+        // For Privy embedded wallets, try using viem with the wallet's client
+        try {
+          const walletClient = createWalletClient({
+            chain: baseSepolia,
+            transport: custom(wallet.provider || (window as any).ethereum),
+          });
+          await walletClient.switchChain({ id: baseSepolia.id });
+          setSwitchingNetwork(false);
+          return;
+        } catch (viemError) {
+          throw new Error("Unable to access wallet provider. Please switch networks manually in your wallet.");
+        }
+      }
+
+      // Try to switch chain first
+      try {
+        await provider.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: baseSepoliaChain.chainId }],
+        });
+      } catch (switchError: any) {
+        // If chain doesn't exist (error code 4902), add it
+        if (switchError.code === 4902 || switchError.code === -32603) {
+          await provider.request({
+            method: "wallet_addEthereumChain",
+            params: [baseSepoliaChain],
+          });
+        } else {
+          throw switchError;
+        }
+      }
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to switch network";
+      setError(`Network switch failed: ${errorMessage}. Please switch manually in your wallet.`);
+    } finally {
+      setSwitchingNetwork(false);
+    }
+  };
 
   const handleFetchListings = async () => {
     if (!apiUrl) {
@@ -53,15 +131,33 @@ export function Listings() {
       const response = await fetchWithPayment(apiUrl);
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch listings: ${response.statusText}`);
+        // Check if it's still a payment required error
+        if (response.status === 402) {
+          throw new Error("Payment failed: Unable to process x402 payment. Please ensure you have USDC balance on Base Sepolia and try again.");
+        }
+        throw new Error(`Failed to fetch listings: ${response.statusText} (${response.status})`);
       }
 
       const data = await response.json();
       const listingsData = Array.isArray(data) ? data : data.listings || [];
       setListings(listingsData);
     } catch (err) {
-      const errorMessage =
+      let errorMessage =
         err instanceof Error ? err.message : "Unknown error occurred";
+      
+      // Improve error messages for common issues
+      if (errorMessage.includes("chainId")) {
+        if (errorMessage.includes("84532")) {
+          errorMessage = "Network mismatch: Please switch your wallet to Base Sepolia testnet. The app requires Base Sepolia (chainId 84532) for x402 payments.";
+        } else {
+          errorMessage = `Network mismatch: ${errorMessage}. Please ensure your wallet is connected to Base Sepolia testnet.`;
+        }
+      } else if (errorMessage.includes("Payment Required") || errorMessage.includes("Payment failed")) {
+        errorMessage = `${errorMessage}\n\nPossible causes:\n• Insufficient USDC balance (need at least $0.0001 USDC)\n• Payment transaction was rejected\n• Network not set to Base Sepolia\n\nTry funding your wallet with USDC first.`;
+      } else if (errorMessage.includes("insufficient") || errorMessage.includes("balance")) {
+        errorMessage = `Insufficient balance: ${errorMessage}\n\nPlease fund your wallet with USDC on Base Sepolia testnet. You need at least $0.0001 USDC to fetch listings.`;
+      }
+      
       setError(errorMessage);
       setListings([]);
     } finally {
@@ -98,6 +194,28 @@ export function Listings() {
             <p className="text-sm text-muted-foreground">
               Access listings via x402 micro-payments
             </p>
+          </div>
+          <div className="ml-auto flex items-center gap-2">
+            <div className="px-3 py-1.5 bg-primary/10 text-primary rounded-md text-xs font-medium">
+              Base Sepolia Required
+            </div>
+            <button
+              onClick={handleSwitchToBaseSepolia}
+              disabled={switchingNetwork || !authenticated}
+              className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground hover:bg-primary/90 rounded-md text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {switchingNetwork ? (
+                <>
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Switching...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-3 h-3" />
+                  Switch Network
+                </>
+              )}
+            </button>
           </div>
         </div>
         
@@ -154,9 +272,48 @@ export function Listings() {
         </div>
 
         {error && (
-          <div className="mt-6 p-4 bg-destructive/10 text-destructive rounded-lg flex items-start gap-3 text-sm">
-            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-            <p>{error}</p>
+          <div className="mt-6 p-4 bg-destructive/10 border border-destructive/20 text-destructive rounded-lg">
+            <div className="flex items-start gap-3 text-sm">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="font-medium mb-1 whitespace-pre-line">{error}</p>
+                {error.includes("Network mismatch") && (
+                  <div className="mt-3 pt-3 border-t border-destructive/20">
+                    <p className="text-xs text-destructive/80 mb-2">
+                      <strong>How to switch networks:</strong>
+                    </p>
+                    <ol className="text-xs text-destructive/80 space-y-1 list-decimal list-inside">
+                      <li>Open your wallet extension (MetaMask, Coinbase Wallet, etc.)</li>
+                      <li>Click on the network dropdown at the top</li>
+                      <li>Select "Base Sepolia" testnet</li>
+                      <li>If Base Sepolia is not listed, add it manually:
+                        <ul className="list-disc list-inside ml-4 mt-1 space-y-0.5">
+                          <li>Network Name: Base Sepolia</li>
+                          <li>RPC URL: https://sepolia.base.org</li>
+                          <li>Chain ID: 84532</li>
+                          <li>Currency Symbol: ETH</li>
+                        </ul>
+                      </li>
+                      <li>Try fetching listings again</li>
+                    </ol>
+                  </div>
+                )}
+                {(error.includes("Payment Required") || error.includes("Payment failed") || error.includes("Insufficient balance")) && (
+                  <div className="mt-3 pt-3 border-t border-destructive/20">
+                    <p className="text-xs text-destructive/80 mb-2">
+                      <strong>To fix payment issues:</strong>
+                    </p>
+                    <ol className="text-xs text-destructive/80 space-y-1 list-decimal list-inside">
+                      <li>Ensure your wallet is on Base Sepolia testnet</li>
+                      <li>Fund your wallet with USDC (at least $0.0001 USDC)</li>
+                      <li>Use the "Fund Wallet" button above to add testnet USDC</li>
+                      <li>Approve the payment transaction when prompted</li>
+                      <li>Try fetching listings again</li>
+                    </ol>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>
