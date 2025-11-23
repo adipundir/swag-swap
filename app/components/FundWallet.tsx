@@ -22,11 +22,7 @@ export function FundWallet() {
     setSuccess(false);
 
     try {
-      await fundWallet(wallets[0].address, {
-        chain: {
-          id: 80002, // Polygon Amoy
-        },
-      });
+      await fundWallet({ address: wallets[0].address });
       setSuccess(true);
     } catch (err) {
       const errorMessage =

@@ -10,7 +10,7 @@ export function SmoothScroll() {
     
     // Add momentum scrolling for iOS
     const body = document.body;
-    body.style.webkitOverflowScrolling = "touch";
+    (body.style as any).webkitOverflowScrolling = "touch";
     
     // Custom scroll easing
     let isScrolling = false;
