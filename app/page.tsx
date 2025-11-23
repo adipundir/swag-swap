@@ -3,13 +3,14 @@
 import { Listings } from "./components/Listings";
 import { FundWallet } from "./components/FundWallet";
 import { CreateListing } from "./components/CreateListing";
+import { VerifyHackerButton } from "./components/VerifyHackerButton";
 import { LandingPage } from "./components/LandingPage";
 import { useState } from "react";
-import { ShoppingBag, PlusCircle } from "lucide-react";
+import { ShoppingBag, PlusCircle, ShieldCheck } from "lucide-react";
 
 export default function Home() {
   const [showApp, setShowApp] = useState(false);
-  const [activeTab, setActiveTab] = useState<"browse" | "create">("browse");
+  const [activeTab, setActiveTab] = useState<"browse" | "create" | "verify">("browse");
 
   if (!showApp) {
     return <LandingPage onGetStarted={() => setShowApp(true)} />;
@@ -44,6 +45,17 @@ export default function Home() {
               <PlusCircle className="mr-2 h-4 w-4" />
               Create Listing
             </button>
+            <button
+              onClick={() => setActiveTab("verify")}
+              className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-8 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${
+                activeTab === "verify"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "hover:bg-background/50 hover:text-foreground"
+              }`}
+            >
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              Verify Hacker
+            </button>
           </div>
         </div>
 
@@ -54,8 +66,12 @@ export default function Home() {
               <FundWallet />
               <Listings />
             </div>
-          ) : (
+          ) : activeTab === "create" ? (
             <CreateListing />
+          ) : (
+            <div className="max-w-2xl mx-auto">
+              <VerifyHackerButton />
+            </div>
           )}
         </div>
       </div>

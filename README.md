@@ -9,17 +9,28 @@ SwagSwap is a Web3 marketplace where hackathon enthusiasts can trade exclusive s
 ## ✨ Features
 
 - 🔐 **Privy Authentication** - Seamless wallet connection with embedded wallets
+- 🛡️ **vlayer Web Proofs** - Server-side cryptographic proofs for hackathon verification
 - 💳 **x402 Payments** - Pay-per-API-call using USDC stablecoins
 - 📦 **Filecoin Storage** - Decentralized image storage via Synapse SDK
 - 🌐 **Cross-Chain Support** - Polygon Amoy & Celo Alfajores testnets
 - 🎨 **Modern UI** - Clean, responsive design with dark mode support
-- ⚡ **Fast & Secure** - Built on Next.js 16 with TypeScript
+- ⚡ **Fast & Secure** - Built on Next.js 15 with TypeScript
 
 ---
 
 ## 🎯 Hackathon Tracks
 
 This project qualifies for:
+
+### **vlayer: Best Server-Side Proving dApp** - $3,000 🏆
+- ✅ Uses vlayer's Web Prover Server (REST API)
+- ✅ POST /prove endpoint for proof generation
+- ✅ POST /verify endpoint for proof verification
+- ✅ TLSNotary (TLSN) protocol for cryptographic proofs
+- ✅ Verifies ETHGlobal hackathon attendance
+- ✅ Zero-knowledge proofs without exposing credentials
+
+See [VLAYER_IMPLEMENTATION.md](./VLAYER_IMPLEMENTATION.md) for detailed documentation.
 
 ### **Filecoin Onchain Cloud Track** - $10,000
 - ✅ Uses Synapse SDK for decentralized storage
@@ -38,12 +49,13 @@ This project qualifies for:
 ## 🏗️ Tech Stack
 
 ### Frontend
-- **Next.js 16** (App Router)
+- **Next.js 15** (App Router)
 - **React 18** with TypeScript
 - **Tailwind CSS 4** for styling
 - **Privy SDK** for authentication
 
 ### Blockchain & Web3
+- **vlayer** - Web Prover Server for cryptographic proofs
 - **Privy** - Embedded wallets & authentication
 - **x402** - HTTP payment protocol
 - **Filecoin** - Decentralized storage via Synapse SDK
@@ -79,7 +91,7 @@ cd swagswap
 npm install --legacy-peer-deps
 ```
 
-> **Note:** The `--legacy-peer-deps` flag is required due to a peer dependency conflict between Next.js 16 and x402-next (which expects Next.js 15). This is safe and the application works correctly.
+> **Note:** The `--legacy-peer-deps` flag is required for some package compatibility. This is safe and the application works correctly.
 
 3. **Set up environment variables**
 
