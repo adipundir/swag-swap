@@ -2,6 +2,7 @@
 
 import { useFundWallet, useWallets } from "@privy-io/react-auth";
 import { useState } from "react";
+import { Wallet, AlertCircle, CheckCircle2, ArrowRight, Loader2 } from "lucide-react";
 
 export function FundWallet() {
   const { wallets } = useWallets();
@@ -41,52 +42,60 @@ export function FundWallet() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-4">
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0">
-            <svg
-              className="h-5 w-5 text-blue-600 dark:text-blue-400"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </div>
-          <div className="flex-1">
-            <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">
-              Need USDC for payments?
-            </h3>
-            <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
-              Add USDC to your wallet to pay for API access and fetch listings using x402.
-            </p>
-            <div className="mt-3">
-              <button
-                onClick={handleFundWallet}
-                disabled={loading}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                {loading ? "Opening..." : "Fund Wallet with USDC"}
-              </button>
+    <div className="w-full">
+      <div className="bg-card border border-border/60 rounded-xl p-6 shadow-sm relative overflow-hidden">
+        {/* Background decoration */}
+        <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative">
+          <div className="flex gap-4">
+            <div className="mt-1 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary">
+              <Wallet className="h-5 w-5" />
             </div>
-            {error && (
-              <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                {error}
+            <div className="space-y-1">
+              <h3 className="font-semibold text-foreground">
+                Need USDC for payments?
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-xl">
+                Add USDC to your wallet to pay for API access and fetch listings using x402.
               </p>
-            )}
-            {success && (
-              <p className="mt-2 text-sm text-green-600 dark:text-green-400">
-                Funding initiated successfully!
-              </p>
-            )}
+              
+              {error && (
+                <div className="flex items-center gap-2 text-sm text-destructive mt-2">
+                  <AlertCircle className="w-4 h-4" />
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="flex items-center gap-2 text-sm text-green-600 mt-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Funding initiated successfully!
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex shrink-0">
+            <button
+              onClick={handleFundWallet}
+              disabled={loading}
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full md:w-auto"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Opening...
+                </>
+              ) : (
+                <>
+                  Fund Wallet
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </button>
           </div>
         </div>
       </div>
     </div>
   );
 }
-

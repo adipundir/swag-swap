@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { uploadToFilecoin } from "../lib/filecoin";
+import { Image as ImageIcon, X, UploadCloud, Check, Loader2 } from "lucide-react";
 
 interface FileUploadProps {
   onUploadComplete: (url: string, cid: string) => void;
@@ -67,25 +68,26 @@ export function FileUpload({
   };
 
   return (
-    <div className="space-y-4">
-      {/* Upload Button */}
+    <div className="w-full">
       <div>
-        <label
-          htmlFor="file-upload"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-        >
-          Upload Image to Filecoin
-        </label>
-        <div className="flex items-center space-x-4">
+        <div className="group relative">
           <label
             htmlFor="file-upload"
-            className={`px-4 py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 transition-colors ${
+            className={`relative flex flex-col items-center justify-center w-full h-52 border-2 border-dashed border-muted-foreground/25 rounded-xl cursor-pointer hover:border-primary/50 hover:bg-accent/50 transition-all duration-200 ${
               uploading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            } ${preview ? "hidden" : "flex"}`}
           >
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {uploading ? "Uploading..." : "Choose Image"}
-            </span>
+            <div className="flex flex-col items-center justify-center pt-5 pb-6 text-center p-4">
+              <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform text-muted-foreground group-hover:text-primary">
+                <UploadCloud className="w-6 h-6" />
+              </div>
+              <p className="mb-2 text-sm font-medium text-foreground">
+                <span className="text-primary font-semibold">Click to upload</span> or drag and drop
+              </p>
+              <p className="text-xs text-muted-foreground">
+                SVG, PNG, JPG or GIF (MAX. 10MB)
+              </p>
+            </div>
           </label>
           <input
             id="file-upload"
@@ -96,57 +98,43 @@ export function FileUpload({
             disabled={uploading}
             className="hidden"
           />
-          {preview && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className="text-sm text-red-500 hover:text-red-600"
-            >
-              Clear
-            </button>
-          )}
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-          Images will be stored on Filecoin via IPFS (Max 10MB)
-        </p>
       </div>
 
       {/* Preview */}
       {preview && (
-        <div className="relative">
+        <div className="relative rounded-xl overflow-hidden border border-border shadow-sm group">
           <img
             src={preview}
             alt="Preview"
-            className="w-full max-w-md h-48 object-cover rounded-md border border-gray-200 dark:border-gray-700"
+            className="w-full h-64 object-cover"
           />
-          {uploading && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-md">
-              <div className="text-white text-sm">
-                Uploading to Filecoin...
+          
+          {uploading ? (
+            <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex flex-col items-center justify-center">
+              <Loader2 className="w-8 h-8 animate-spin text-primary mb-2" />
+              <p className="text-foreground text-sm font-medium">Uploading to Filecoin...</p>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleClear}
+              className="absolute top-2 right-2 p-1.5 bg-background/90 hover:bg-background text-destructive rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+
+          {!uploading && (
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
+               <div className="flex items-center gap-1.5 text-xs text-white font-medium">
+                <Check className="w-3.5 h-3.5 text-green-400" />
+                Stored on Filecoin Onchain Cloud
               </div>
             </div>
           )}
         </div>
       )}
-
-      {/* Filecoin Badge */}
-      {preview && !uploading && (
-        <div className="flex items-center space-x-2 text-xs text-green-600 dark:text-green-400">
-          <svg
-            className="w-4 h-4"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <span>Stored on Filecoin Onchain Cloud</span>
-        </div>
-      )}
     </div>
   );
 }
-

@@ -1,6 +1,7 @@
 "use client";
 
 import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { Copy, LogOut, Wallet } from "lucide-react";
 
 export function Navbar() {
   const { ready, authenticated, login, logout } = usePrivy();
@@ -11,71 +12,57 @@ export function Navbar() {
     ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
     : "";
 
-  if (!ready) {
-    return (
-      <nav className="border-b border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                SwagSwap
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button
-                disabled
-                className="px-4 py-2 bg-gray-300 text-gray-600 rounded-md cursor-not-allowed"
-              >
-                Loading...
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
-    );
-  }
-
   return (
-    <nav className="border-b border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-              SwagSwap
-            </h1>
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4 mx-auto">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
+            S
           </div>
-          <div className="flex items-center space-x-4">
-            {authenticated ? (
-              <>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(walletAddress);
-                    alert("Wallet address copied to clipboard!");
-                  }}
-                  className="text-sm text-gray-700 dark:text-gray-300 font-mono hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer"
-                  title="Click to copy full address"
-                >
-                  {truncatedAddress}
-                </button>
-                <button
-                  onClick={logout}
-                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition-colors"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
+          <span className="font-bold text-xl tracking-tight">SwagSwap</span>
+        </div>
+
+        <div className="flex items-center gap-4">
+          {!ready ? (
+            <button
+              disabled
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground h-9 px-4 py-2"
+            >
+              Loading...
+            </button>
+          ) : authenticated ? (
+            <div className="flex items-center gap-3">
               <button
-                onClick={login}
-                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors"
+                onClick={() => {
+                  navigator.clipboard.writeText(walletAddress);
+                  // Optional: Toast notification could go here
+                }}
+                className="group flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors bg-secondary/50 hover:bg-secondary px-3 py-1.5 rounded-md border border-transparent hover:border-border"
+                title="Copy address"
               >
-                Login
+                <Wallet className="h-4 w-4" />
+                <span className="font-mono">{truncatedAddress}</span>
+                <Copy className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
               </button>
-            )}
-          </div>
+              
+              <button
+                onClick={logout}
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={login}
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-6 py-2 shadow-sm"
+            >
+              Login
+            </button>
+          )}
         </div>
       </div>
-    </nav>
+    </header>
   );
 }
-

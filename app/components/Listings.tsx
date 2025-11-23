@@ -2,6 +2,7 @@
 
 import { useX402Fetch, useWallets, usePrivy } from "@privy-io/react-auth";
 import { useState } from "react";
+import { Search, DollarSign, AlertCircle, Loader2, ShoppingBag, ArrowRight } from "lucide-react";
 
 export interface Listing {
   id: string;
@@ -70,26 +71,39 @@ export function Listings() {
 
   if (!authenticated) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
-          <p className="text-gray-600 dark:text-gray-400">
-            Please login to view listings
-          </p>
+      <div className="w-full p-8 border border-dashed rounded-lg bg-muted/30 flex flex-col items-center justify-center text-center">
+        <div className="bg-background p-3 rounded-full shadow-sm mb-4">
+          <ShoppingBag className="w-6 h-6 text-muted-foreground" />
         </div>
+        <h3 className="text-lg font-medium mb-2">Login Required</h3>
+        <p className="text-muted-foreground max-w-sm">
+          Please connect your wallet to view and purchase exclusive listings.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 space-y-6">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
-        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-          Fetch Listings (x402 Payments)
-        </h2>
-        
-        <div className="space-y-3">
+    <div className="space-y-8">
+      {/* Fetch Control Panel */}
+      <div className="bg-card border border-border/60 rounded-xl p-6 shadow-sm">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 bg-primary/10 rounded-lg text-primary">
+            <Search className="w-5 h-5" />
+          </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <h2 className="text-lg font-semibold tracking-tight">
+              Fetch Listings
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Access listings via x402 micro-payments
+            </p>
+          </div>
+        </div>
+        
+        <div className="grid md:grid-cols-[2fr_1fr_auto] gap-4 items-end">
+          <div className="space-y-2">
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               API URL
             </label>
             <input
@@ -97,49 +111,68 @@ export function Listings() {
               value={apiUrl}
               onChange={(e) => setApiUrl(e.target.value)}
               placeholder="https://api.example.com/listings"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Max Payment (USDC in smallest unit, 6 decimals)
+          <div className="space-y-2">
+            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              Max Payment
             </label>
-            <input
-              type="text"
-              value={maxPayment}
-              onChange={(e) => setMaxPayment(e.target.value)}
-              placeholder="1000000 = 1 USDC"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-            />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Default: 1,000,000 (1 USDC with 6 decimals)
-            </p>
+            <div className="relative">
+              <input
+                type="text"
+                value={maxPayment}
+                onChange={(e) => setMaxPayment(e.target.value)}
+                placeholder="1000000"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-16"
+              />
+              <span className="absolute right-3 top-3 text-xs text-muted-foreground pointer-events-none">
+                Units
+              </span>
+            </div>
           </div>
 
           <button
             onClick={handleFetchListings}
             disabled={loading || !apiUrl}
-            className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6"
           >
-            {loading ? "Fetching & Processing Payment..." : "Fetch Listings"}
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <>
+                Fetch
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </>
+            )}
           </button>
+        </div>
+        
+        <div className="mt-2 text-[10px] text-muted-foreground text-right">
+          1,000,000 units = 1 USDC
         </div>
 
         {error && (
-          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-            <p className="text-sm text-red-600 dark:text-red-400">
-              Error: {error}
-            </p>
+          <div className="mt-6 p-4 bg-destructive/10 text-destructive rounded-lg flex items-start gap-3 text-sm">
+            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+            <p>{error}</p>
           </div>
         )}
       </div>
 
+      {/* Results Grid */}
       {listings.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Available Listings ({listings.length})
-          </h3>
+        <div className="space-y-6 animate-in fade-in-50 slide-in-from-bottom-4 duration-500">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xl font-semibold tracking-tight">
+              Available Listings
+            </h3>
+            <span className="text-sm text-muted-foreground bg-secondary px-2.5 py-0.5 rounded-full">
+              {listings.length} items
+            </span>
+          </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {listings.map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
@@ -149,9 +182,13 @@ export function Listings() {
       )}
 
       {!loading && listings.length === 0 && !error && (
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-8 text-center">
-          <p className="text-gray-600 dark:text-gray-400">
-            No listings fetched yet. Enter an API URL and click "Fetch Listings" to view hackathon merch.
+        <div className="flex flex-col items-center justify-center py-16 px-4 text-center border border-dashed rounded-xl bg-muted/30">
+          <div className="bg-background p-4 rounded-full shadow-sm mb-4">
+            <ShoppingBag className="w-8 h-8 text-muted-foreground/50" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground mb-2">No listings yet</h3>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            Enter an API URL above and authorize the payment to reveal exclusive hackathon merchandise.
           </p>
         </div>
       )}
@@ -161,26 +198,39 @@ export function Listings() {
 
 function ListingCard({ listing }: { listing: Listing }) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-      {listing.imageUrl && (
-        <img
-          src={listing.imageUrl}
-          alt={listing.title}
-          className="w-full h-48 object-cover"
-        />
-      )}
-      <div className="p-4">
-        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-          {listing.title}
-        </h4>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
-          {listing.description}
-        </p>
-        <div className="flex justify-between items-center">
-          <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-            {listing.price}
-          </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400 font-mono">
+    <div className="group relative bg-card rounded-xl border border-border/60 overflow-hidden hover:shadow-md transition-all duration-300 hover:border-border">
+      <div className="aspect-[4/3] relative overflow-hidden bg-muted">
+        {listing.imageUrl ? (
+          <img
+            src={listing.imageUrl}
+            alt={listing.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-secondary/50">
+            <ShoppingBag className="w-10 h-10 text-muted-foreground/20" />
+          </div>
+        )}
+        <div className="absolute top-2 right-2">
+           <span className="inline-flex items-center rounded-md bg-background/90 backdrop-blur px-2 py-1 text-xs font-medium ring-1 ring-inset ring-gray-500/10 shadow-sm">
+             {listing.price}
+           </span>
+        </div>
+      </div>
+      
+      <div className="p-5 space-y-3">
+        <div>
+          <h4 className="font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+            {listing.title}
+          </h4>
+          <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+            {listing.description}
+          </p>
+        </div>
+        
+        <div className="pt-3 border-t border-border/50 flex items-center justify-between text-xs">
+          <span className="text-muted-foreground">Seller</span>
+          <span className="font-mono bg-secondary px-1.5 py-0.5 rounded text-secondary-foreground">
             {listing.seller.slice(0, 6)}...{listing.seller.slice(-4)}
           </span>
         </div>
@@ -188,4 +238,3 @@ function ListingCard({ listing }: { listing: Listing }) {
     </div>
   );
 }
-

@@ -3,6 +3,7 @@
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import { useState } from "react";
 import { FileUpload } from "./FileUpload";
+import { Tag, Type, AlignLeft, DollarSign, Upload, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
 interface ListingFormData {
   title: string;
@@ -98,8 +99,8 @@ export function CreateListing() {
   if (!authenticated) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
-          <p className="text-gray-600 dark:text-gray-400">
+        <div className="bg-card border border-border rounded-xl shadow-sm p-8 text-center">
+          <p className="text-muted-foreground">
             Please login to create a listing
           </p>
         </div>
@@ -108,20 +109,26 @@ export function CreateListing() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-          List Your Hackathon Swag
-        </h2>
+    <div className="max-w-2xl mx-auto">
+      <div className="bg-card border border-border/60 rounded-xl shadow-sm">
+        <div className="p-6 sm:p-8 border-b border-border/60">
+          <h2 className="text-2xl font-bold text-foreground tracking-tight mb-1">
+            List Your Hackathon Swag
+          </h2>
+          <p className="text-muted-foreground text-sm">
+            Create a listing to sell your exclusive merchandise on the decentralized marketplace.
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
           {/* Title */}
-          <div>
+          <div className="space-y-2">
             <label
               htmlFor="title"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2"
             >
-              Item Title *
+              <Type className="w-3.5 h-3.5" />
+              Item Title <span className="text-destructive">*</span>
             </label>
             <input
               type="text"
@@ -131,41 +138,80 @@ export function CreateListing() {
               onChange={handleChange}
               required
               placeholder="e.g., ETH Denver 2024 Hoodie"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
 
-          {/* Category */}
-          <div>
-            <label
-              htmlFor="category"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >
-              Category *
-            </label>
-            <select
-              id="category"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-            >
-              <option value="clothing">Clothing</option>
-              <option value="accessories">Accessories</option>
-              <option value="stickers">Stickers</option>
-              <option value="collectibles">Collectibles</option>
-              <option value="other">Other</option>
-            </select>
+          <div className="grid grid-cols-2 gap-6">
+            {/* Category */}
+            <div className="space-y-2">
+              <label
+                htmlFor="category"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2"
+              >
+                <Tag className="w-3.5 h-3.5" />
+                Category <span className="text-destructive">*</span>
+              </label>
+              <div className="relative">
+                <select
+                  id="category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleChange}
+                  required
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
+                >
+                  <option value="clothing">Clothing</option>
+                  <option value="accessories">Accessories</option>
+                  <option value="stickers">Stickers</option>
+                  <option value="collectibles">Collectibles</option>
+                  <option value="other">Other</option>
+                </select>
+                <div className="absolute right-3 top-3 pointer-events-none text-muted-foreground">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Price */}
+            <div className="space-y-2">
+              <label
+                htmlFor="price"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2"
+              >
+                <DollarSign className="w-3.5 h-3.5" />
+                Price <span className="text-destructive">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  id="price"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  required
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-12"
+                />
+                <span className="absolute right-3 top-2.5 text-xs font-medium text-muted-foreground">
+                  USDC
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Description */}
-          <div>
+          <div className="space-y-2">
             <label
               htmlFor="description"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2"
             >
-              Description *
+              <AlignLeft className="w-3.5 h-3.5" />
+              Description <span className="text-destructive">*</span>
             </label>
             <textarea
               id="description"
@@ -175,64 +221,45 @@ export function CreateListing() {
               required
               rows={4}
               placeholder="Describe your item, condition, size, etc."
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-none"
+              className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
             />
           </div>
 
-          {/* Price */}
-          <div>
-            <label
-              htmlFor="price"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >
-              Price (USDC) *
+          {/* File Upload to Filecoin */}
+          <div className="space-y-3 pt-4 border-t border-border/60">
+             <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-2">
+              <Upload className="w-3.5 h-3.5" />
+              Product Image
             </label>
-            <div className="relative">
-              <input
-                type="number"
-                id="price"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                required
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+            <div className="bg-muted/30 rounded-lg border border-dashed border-border p-4">
+              <FileUpload
+                onUploadComplete={(url, cid) => {
+                  setFormData({ ...formData, imageUrl: url, imageCid: cid });
+                  setError(null);
+                }}
+                onUploadStart={() => {
+                  setError(null);
+                }}
+                onError={(err) => {
+                  setError(err);
+                }}
               />
-              <span className="absolute right-3 top-2 text-gray-500 dark:text-gray-400">
-                USDC
-              </span>
             </div>
           </div>
 
-          {/* File Upload to Filecoin */}
-          <FileUpload
-            onUploadComplete={(url, cid) => {
-              setFormData({ ...formData, imageUrl: url, imageCid: cid });
-              setError(null);
-            }}
-            onUploadStart={() => {
-              setError(null);
-            }}
-            onError={(err) => {
-              setError(err);
-            }}
-          />
-
           {/* Error Message */}
           {error && (
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            <div className="p-4 bg-destructive/10 text-destructive rounded-lg flex items-start gap-3 text-sm">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <p>{error}</p>
             </div>
           )}
 
           {/* Success Message */}
           {success && (
-            <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
-              <p className="text-sm text-green-600 dark:text-green-400">
-                ✓ Listing created successfully!
-              </p>
+            <div className="p-4 bg-green-500/10 text-green-600 dark:text-green-500 rounded-lg flex items-start gap-3 text-sm">
+              <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <p>Listing created successfully!</p>
             </div>
           )}
 
@@ -240,21 +267,26 @@ export function CreateListing() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 w-full shadow-sm"
           >
-            {loading ? "Creating Listing..." : "Create Listing"}
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating Listing...
+              </>
+            ) : (
+              "Create Listing"
+            )}
           </button>
         </form>
 
-        {/* Info Box */}
-        <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-          <p className="text-sm text-blue-800 dark:text-blue-200">
-            <strong>Note:</strong> Your wallet address will be publicly visible
-            as the seller. Make sure all information is accurate before listing.
+        <div className="px-6 py-4 bg-muted/30 border-t border-border/60 rounded-b-xl">
+          <p className="text-xs text-muted-foreground text-center">
+            <strong className="font-medium text-foreground">Note:</strong> Your wallet address will be publicly visible
+            as the seller. Images are permanently stored on the Filecoin network.
           </p>
         </div>
       </div>
     </div>
   );
 }
-

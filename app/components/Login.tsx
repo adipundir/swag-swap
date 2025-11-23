@@ -11,7 +11,7 @@ export function Login() {
       <div className="p-4">
         <button
           disabled
-          className="px-4 py-2 bg-gray-300 text-gray-600 rounded cursor-not-allowed"
+          className="px-4 py-2 bg-[#ede8e0] text-[#6b5d47] rounded-lg cursor-not-allowed font-medium text-sm"
         >
           Loading...
         </button>
@@ -24,13 +24,13 @@ export function Login() {
 
     return (
       <div className="p-4 space-y-4">
-        <div className="p-4 bg-gray-100 rounded">
-          <p className="text-sm text-gray-600 mb-2">Wallet Address:</p>
-          <p className="font-mono text-sm break-all">{walletAddress || 'No wallet connected'}</p>
+        <div className="p-4 bg-[#faf8f5] rounded-xl border border-[#e5ddd0]">
+          <p className="text-xs font-medium text-[#6b5d47] mb-1 uppercase tracking-wide">Wallet Address</p>
+          <p className="font-mono text-sm text-[#5c4a37] break-all">{walletAddress || 'No wallet connected'}</p>
         </div>
         <button
           onClick={logout}
-          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+          className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-600 rounded-lg transition-colors text-sm font-medium"
         >
           Logout
         </button>
@@ -42,11 +42,10 @@ export function Login() {
     <div className="p-4">
       <button
         onClick={login}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+        className="px-4 py-2 bg-[#8b6f47] hover:bg-[#7a5f3f] text-white rounded-lg transition-colors text-sm font-medium shadow-sm"
       >
         Login
       </button>
     </div>
   );
 }
-
