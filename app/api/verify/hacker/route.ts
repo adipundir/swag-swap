@@ -1,26 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyBrowserProof, isValidConfirmationText } from "@/lib/vlayer/browser-prover";
+import { verifyWebProof, isValidConfirmationText, type ProveResponse } from "@/lib/vlayer/web-prover-api";
 
 /**
  * Interface for the proof object received from the frontend
- * Updated to support browser-based Web Proofs
+ * Updated to support vlayer Web Prover Server REST API proofs (TLSNotary)
  */
 interface ProofPayload {
   proof: {
-    presentationJson: {
-      version: string;
-      url: string;
-      timestamp: number;
-      method: string;
-      selector: string;
-      extractedText: string;
-      screenshot: string;
-      pageHash: string;
-      signature: string;
+    // TLSNotary proof data from vlayer Web Prover Server
+    data: string; // Hex-encoded proof data
+    version: string; // TLSN protocol version
+    meta: {
+      notaryUrl: string; // Notary server URL
     };
-    timestamp: number;
-    url: string;
+    // Extracted data
     confirmationText: string;
+    event: string;
+    url: string;
+    timestamp: number;
+    serverDomain: string;
+    notaryKeyFingerprint: string;
   };
   walletAddress: string;
 }
@@ -41,13 +40,13 @@ interface UserVerification {
 const verifiedUsers = new Map<string, UserVerification>();
 
 /**
- * Verify the cryptographic proof using vlayer's verification
- * This uses the Web Prover Server to verify the TLSN proof
+ * Verify the cryptographic proof using vlayer's Web Prover Server REST API
+ * This uses TLSNotary protocol for cryptographic verification
  */
 async function verifyProofStructure(proof: ProofPayload["proof"]): Promise<boolean> {
   try {
     // Basic structure validation
-    if (!proof.presentationJson || !proof.timestamp || !proof.url) {
+    if (!proof.data || !proof.version || !proof.meta || !proof.timestamp || !proof.url) {
       console.error("Missing required proof fields");
       return false;
     }
@@ -60,23 +59,33 @@ async function verifyProofStructure(proof: ProofPayload["proof"]): Promise<boole
       return false;
     }
 
-    // Check URL is ETHGlobal dashboard
-    if (!proof.url.includes("dashboard.ethglobal.com")) {
-      console.error("Proof is not from ETHGlobal dashboard");
+    // Check URL is ETHGlobal
+    if (!proof.url.includes("ethglobal.com")) {
+      console.error("Proof is not from ETHGlobal");
       return false;
     }
 
-    console.log("🔍 Verifying browser-based Web Proof...");
+    console.log("🔍 Verifying TLSNotary Web Proof via vlayer Web Prover Server...");
+    console.log("   Proof data length:", proof.data.length, "characters");
+    console.log("   TLSN version:", proof.version);
 
-    // Verify the cryptographic proof
-    const verificationResult = await verifyBrowserProof(proof.presentationJson);
+    // Verify the cryptographic proof using vlayer's REST API
+    const tlsnProof: ProveResponse = {
+      data: proof.data,
+      version: proof.version,
+      meta: proof.meta,
+    };
 
-    if (!verificationResult.isValid) {
+    const verificationResult = await verifyWebProof(tlsnProof);
+
+    if (!verificationResult.success) {
       console.error("Proof verification failed:", verificationResult.error);
       return false;
     }
 
-    console.log("✅ Proof cryptographically verified");
+    console.log("✅ TLSNotary proof cryptographically verified");
+    console.log("   Server domain:", verificationResult.serverDomain);
+    console.log("   Notary key fingerprint:", verificationResult.notaryKeyFingerprint.substring(0, 16) + "...");
     return true;
   } catch (error) {
     console.error("Error verifying proof structure:", error);
@@ -168,7 +177,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Step 3: Store verification status
-    const proofHash = Buffer.from(JSON.stringify(body.proof.presentationJson)).toString("base64").substring(0, 64);
+    // Use the TLSNotary proof data hash as the proof identifier
+    const proofHash = body.proof.data.substring(0, 64); // First 64 chars of hex proof
     const verification: UserVerification = {
       walletAddress: body.walletAddress.toLowerCase(),
       isVerified: true,

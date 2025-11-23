@@ -58,8 +58,8 @@ export function Listings() {
       // Try to get provider from wallet or window.ethereum
       let provider: any = null;
       
-      if (wallet.provider) {
-        provider = wallet.provider;
+      if ((wallet as any).provider) {
+        provider = (wallet as any).provider;
       } else if (typeof window !== "undefined" && (window as any).ethereum) {
         provider = (window as any).ethereum;
       }
@@ -69,7 +69,7 @@ export function Listings() {
         try {
           const walletClient = createWalletClient({
             chain: baseSepolia,
-            transport: custom(wallet.provider || (window as any).ethereum),
+            transport: custom((wallet as any).provider || (window as any).ethereum),
           });
           await walletClient.switchChain({ id: baseSepolia.id });
           setSwitchingNetwork(false);
