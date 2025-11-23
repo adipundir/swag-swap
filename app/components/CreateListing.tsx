@@ -28,6 +28,7 @@ export function CreateListing() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resetFileUpload, setResetFileUpload] = useState(0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +65,7 @@ export function CreateListing() {
       console.log("Listing created:", data.listing);
 
       setSuccess(true);
+      
       // Reset form
       setFormData({
         title: "",
@@ -73,8 +75,14 @@ export function CreateListing() {
         category: "clothing",
       });
 
-      // Hide success message after 3 seconds
-      setTimeout(() => setSuccess(false), 3000);
+      // Reset file upload component
+      setResetFileUpload((prev) => prev + 1);
+
+      // Scroll to top to show success message
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      // Hide success message after 5 seconds
+      setTimeout(() => setSuccess(false), 5000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create listing");
     } finally {
@@ -230,6 +238,7 @@ export function CreateListing() {
             </label>
             <div className="bg-muted/30 rounded-lg border border-dashed border-border p-4">
               <FileUpload
+                key={resetFileUpload}
                 onUploadComplete={(url) => {
                   setFormData({ ...formData, imageUrl: url });
                   setError(null);
@@ -254,9 +263,14 @@ export function CreateListing() {
 
           {/* Success Message */}
           {success && (
-            <div className="p-4 bg-green-500/10 text-green-600 dark:text-green-500 rounded-lg flex items-start gap-3 text-sm">
+            <div className="p-4 bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-500 rounded-lg flex items-start gap-3 text-sm animate-in fade-in-50 slide-in-from-top-2 duration-300">
               <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
-              <p>Listing created successfully!</p>
+              <div className="flex-1">
+                <p className="font-medium">Listing created successfully!</p>
+                <p className="text-xs mt-1 text-green-600/80 dark:text-green-500/80">
+                  Your listing has been saved to the database and is now available for others to view.
+                </p>
+              </div>
             </div>
           )}
 
